@@ -1335,7 +1335,8 @@
       'checkin':renderCheckin,
       'home':renderHome,
       'timer':()=>`<div class="scroll-screen">${buildTimer()}</div>`,
-      'relapse':()=>`<div class="scroll-screen">${renderRelapse()}</div>`
+      'relapse':()=>`<div class="scroll-screen">${renderRelapse()}</div>`,
+      'wisdom':renderWisdomScreen
     };
     el.innerHTML=(map[S.screen]||renderTypeSelection)();
 
@@ -1783,7 +1784,7 @@
     // Ежедневная мудрость — меняется каждый день
     const dayOfYear = Math.floor((new Date()-new Date(new Date().getFullYear(),0,0))/86400000);
     const dw = DAILY_WISDOM[dayOfYear % DAILY_WISDOM.length];
-    const dailyWisdomHtml = `<div onclick="setTab('wisdom');renderHomeContent()" style="margin-top:8px;padding:9px 12px;background:rgba(139,92,246,.08);border-radius:12px;border-left:2px solid rgba(139,92,246,.4);cursor:pointer">
+    const dailyWisdomHtml = `<div onclick="navigate('wisdom')" style="margin-top:8px;padding:9px 12px;background:rgba(139,92,246,.08);border-radius:12px;border-left:2px solid rgba(139,92,246,.4);cursor:pointer">
       <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(139,92,246,.7);margin-bottom:3px">${dw.e} ${dw.tr}</div>
       <div style="font-size:12px;color:rgba(254,248,238,.65);line-height:1.5">${dw.text}</div>
     </div>`;
@@ -1820,7 +1821,7 @@
         <button class="nav-btn ${_tab==='chat'?'active':''}" onclick="setTab('chat')"><span class="nav-btn-icon">💬</span>Чат</button>
         <button class="nav-btn ${_tab==='why'?'active':''}" onclick="setTab('why')"><span class="nav-btn-icon">❤️</span>Причины</button>
         <div class="nav-crisis-wrap">
-          <button onclick="setTab('wisdom');renderHomeContent()" title="Мудрость народов"
+          <button onclick="navigate('wisdom')" title="Мудрость народов"
             style="width:60px;height:60px;border-radius:50%;background:${_tab==='wisdom'?'linear-gradient(135deg,rgba(139,92,246,.4),rgba(124,111,255,.3))':'linear-gradient(135deg,rgba(139,92,246,.2),rgba(124,111,255,.12))'};border:2px solid ${_tab==='wisdom'?'rgba(139,92,246,.7)':'rgba(139,92,246,.35)'};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;margin-top:-22px;box-shadow:0 4px 20px rgba(139,92,246,${_tab==='wisdom'?'.4':'.15'}),0 0 0 4px rgba(139,92,246,.06);transition:all .2s">
             <span style="font-size:22px;line-height:1">🧭</span>
             <span style="font-size:9px;color:rgba(167,139,250,.9);font-weight:800;letter-spacing:.02em">Линзы</span>
@@ -1917,6 +1918,58 @@
   }
 
 
+  function renderWisdomScreen(){
+    var active = S.wisdomLens;
+    var activeName = '';
+    if(active){
+      var fa=PHILOSOPHICAL_TRADITIONS.find(function(x){return x.id===active;});
+      if(fa) activeName=fa.emoji+' '+fa.name;
+    }
+    var html='<div class="scroll-screen"><div style="padding:14px">';
+    html+='<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">';
+    html+='<button onclick="navigate(\'home\')" style="background:rgba(255,255,255,.08);border:none;border-radius:50%;width:36px;height:36px;font-size:18px;cursor:pointer;color:#f0f0ff;flex-shrink:0">&#8592;</button>';
+    html+='<div><div style="font-size:19px;font-weight:900;color:#f0f0ff">🧭 Мудрость народов</div>';
+    if(activeName) html+='<div style="font-size:12px;color:#fcd34d;margin-top:2px">Линза: '+activeName+'</div>';
+    html+='</div></div>';
+    html+='<p style="font-size:13px;color:#9999bb;margin-bottom:14px;line-height:1.5">Традиции о природе зависимости. Выбери линзу — ИИ заговорит её языком.</p>';
+    for(var i=0;i<PHILOSOPHICAL_TRADITIONS.length;i++){
+      var t=PHILOSOPHICAL_TRADITIONS[i];
+      var isOpen=(S.expandedTradition===t.id);
+      var isAct=(active===t.id);
+      var bg=isAct?t.color:isOpen?'#221800':'#1a1200';
+      var bd=isAct?t.color:isOpen?t.border:'rgba(255,255,255,.1)';
+      var headCol=isAct?'#0d0a00':isOpen?t.color:'#f0f0ff';
+      var subCol=isAct?'rgba(0,0,0,.6)':'#9999bb';
+      html+='<div style="background:'+bg+';border:2px solid '+bd+';border-radius:18px;margin-bottom:8px;overflow:hidden">';
+      html+='<div onclick="toggleTradition(\''+t.id+'\')" style="padding:14px 16px;cursor:pointer">';
+      html+='<div style="font-size:24px;margin-bottom:6px">'+t.emoji+'</div>';
+      html+='<div style="font-size:15px;font-weight:800;color:'+headCol+'">'+t.name+'</div>';
+      html+='<div style="font-size:12px;color:'+subCol+';margin-top:3px">'+t.tagline+'</div>';
+      html+='</div>';
+      if(isOpen){
+        html+='<div style="padding:0 16px 16px">';
+        html+='<p style="font-size:13px;color:#9999bb;line-height:1.7;margin-bottom:10px">'+t.core+'</p>';
+        html+='<div style="background:rgba(0,0,0,.3);border-radius:12px;padding:12px;margin-bottom:10px">';
+        html+='<div style="font-size:11px;font-weight:700;color:'+t.color+';text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">'+t.technique+'</div>';
+        for(var j=0;j<t.steps.length;j++){
+          html+='<div style="display:flex;gap:8px;margin-bottom:7px"><span style="min-width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,.1);color:'+t.color+';font-size:10px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">'+(j+1)+'</span>';
+          html+='<span style="font-size:13px;color:#9999bb;line-height:1.5">'+t.steps[j]+'</span></div>';
+        }
+        html+='</div>';
+        html+='<div style="font-size:13px;font-style:italic;color:'+t.color+';border-left:2px solid '+t.border+';padding-left:10px;line-height:1.6;margin-bottom:12px">'+t.quote+'</div>';
+        var btnBg=isAct?t.color:'rgba(255,255,255,.08)';
+        var btnCol=isAct?'#0d0a00':t.color;
+        var btnTxt=isAct?'&#10003; Эта линза активна':'Применить линзу для ИИ';
+        html+='<button onclick="setWisdomLens(\''+t.id+'\')" style="width:100%;padding:12px;border-radius:12px;background:'+btnBg+';border:2px solid '+t.border+';color:'+btnCol+';font-size:14px;font-weight:700;cursor:pointer">'+btnTxt+'</button>';
+        html+='</div>';
+      }
+      html+='</div>';
+    }
+    html+='<p style="font-size:11px;color:#555577;text-align:center;padding:8px 0">Линза не меняет убеждения — только язык ИИ</p>';
+    html+='</div></div>';
+    return html;
+  }
+
   function renderWisdomTab(){
     const active = S.wisdomLens;
     return `<div style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px">
@@ -1965,14 +2018,14 @@
 
   function toggleTradition(id){
     S.expandedTradition = S.expandedTradition === id ? null : id;
-    renderHomeContent();
+    if(S.screen==='wisdom') render(); else renderHomeContent();
   }
 
   function setWisdomLens(id){
     S.wisdomLens = id;
     if(id) lss(SK.WISDOM_LENS, id); else lsr(SK.WISDOM_LENS);
     saveState();
-    renderHomeContent();
+    if(S.screen==='wisdom') render(); else renderHomeContent();
     if(id){
       const t = PHILOSOPHICAL_TRADITIONS.find(x=>x.id===id);
       toast(`Линза «${t?.name}» активна — ИИ говорит её языком`);
