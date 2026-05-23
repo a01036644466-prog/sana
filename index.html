@@ -686,13 +686,7 @@
   <script>
   'use strict';
 
-  // При деплое на Vercel ключ хранится на сервере — здесь оставь пустым
-  // При локальном запуске (file://) можно вставить ключ для тестирования
   const GROQ_API_KEY = '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';
-
-  // Умный роутинг: на Vercel используем прокси, локально — прямой запрос
-  const IS_DEPLOYED = window.location.protocol === 'https:';
-  const CHAT_API_URL = IS_DEPLOYED ? '/api/chat' : 'https://api.groq.com/openai/v1/chat/completions';
 
   const ONBOARDING_SLIDES = [
     {
@@ -3189,10 +3183,7 @@ ${nameCtx}${profileCtx}${intentionCtx}${checkinCtx}${whyCtx}${distCtx}Серия
 Язык: русский. Без осуждения.${ctx}`;
 
     const history=S.chatMsgs.filter(m=>m.role==='user'||m.role==='assistant').slice(-10).map(m=>({role:m.role,content:m.text}));
-    const fetchHeaders = IS_DEPLOYED
-      ? {'Content-Type':'application/json'}
-      : {'Content-Type':'application/json','Authorization':`Bearer ${key}`};
-    const res=await fetch(CHAT_API_URL,{method:'POST',headers:fetchHeaders,body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'system',content:sys},...history,{role:'user',content:userMsg}],max_tokens:320,temperature:0.75})});
+    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'system',content:sys},...history,{role:'user',content:userMsg}],max_tokens:320,temperature:0.75})});
     if(res.status===401)throw new Error('401');if(res.status===429)throw new Error('429: лимит запросов, подожди минуту');
     if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(`${res.status}: ${e.error?.message||res.statusText}`);}
     const data=await res.json();return data.choices[0].message.content;
