@@ -3316,6 +3316,8 @@
       let reply;
       if(m.includes('401')){
         reply='Ошибка авторизации на сервере. Проверь настройки GROQ_API_KEY в Vercel.';
+      } else if(m.includes('429')){
+        reply='Слишком много сообщений подряд — подожди минуту и попробуй снова.';
       } else {
         // Нет сети или другая ошибка — показываем офлайн-поддержку
         reply = OFFLINE_SUPPORT[Math.floor(Math.random()*OFFLINE_SUPPORT.length)];
