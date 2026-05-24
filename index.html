@@ -480,6 +480,18 @@
     ::-webkit-scrollbar-thumb { background: rgba(245,158,11,.15); border-radius: 2px; }
     .hidden { display: none !important; }
     @media (min-width: 500px) { .modal { justify-content: center; } .modal-content { max-width: 480px; } }
+
+  /* ── TOUR ── */
+  .tour-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;}
+  .tour-overlay.hidden{display:none;}
+  .tour-card{background:linear-gradient(160deg,#1a1200,#0d0a00);border:1px solid rgba(245,158,11,.35);border-radius:28px;padding:36px 28px 28px;max-width:380px;width:100%;display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center;animation:scalePop .35s cubic-bezier(.34,1.56,.64,1);}
+  .tour-icon{font-size:54px;line-height:1;}
+  .tour-title{font-size:22px;font-weight:900;color:var(--text);}
+  .tour-desc{font-size:14px;color:var(--text-2);line-height:1.7;max-width:300px;}
+  .tour-dots{display:flex;gap:6px;margin:4px 0;}
+  .tour-dot{width:7px;height:7px;border-radius:50%;background:rgba(245,158,11,.25);transition:all .25s;}
+  .tour-dot.active{background:#f59e0b;width:20px;border-radius:4px;}
+  .tour-btns{display:flex;gap:10px;width:100%;margin-top:4px;}
   </style>
 </head>
 <body>
@@ -525,6 +537,10 @@
             <button class="btn btn-outline btn-sm" onclick="openHistory()">📋 История</button>
             <button class="btn btn-outline btn-sm" onclick="exportData()">⬇️ Текст</button>
           </div>
+        </div>
+        <div class="setting-group">
+          <button class="btn btn-outline btn-sm" style="width:100%" onclick="closeSettings();navigate('help')">❓ Как пользоваться SANA</button>
+          <button class="btn btn-outline btn-sm" style="width:100%;margin-top:6px" onclick="closeSettings();showTour()">🗺️ Показать тур заново</button>
         </div>
         <div class="setting-group">
           <button class="btn btn-outline btn-danger btn-sm" onclick="resetStats()">Сбросить статистику</button>
@@ -678,6 +694,11 @@
     </div>
   </div>
 
+  <!-- Tour overlay -->
+  <div id="tour-overlay" class="tour-overlay hidden">
+    <div class="tour-card" id="tour-card"></div>
+  </div>
+
   <!-- Milestone celebration -->
   <div id="milestone-modal" class="modal hidden" style="align-items:center;justify-content:center">
     <div id="milestone-content" style="background:linear-gradient(160deg,#1a1200,#0d0a00);border:1px solid rgba(245,158,11,.25);border-radius:28px;padding:36px 28px;max-width:340px;width:90%;text-align:center;animation:scalePop .4s cubic-bezier(.34,1.56,.64,1);display:flex;flex-direction:column;gap:16px;align-items:center"></div>
@@ -686,7 +707,6 @@
   <script>
   'use strict';
 
-  const GROQ_API_KEY = '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';
 
   const ONBOARDING_SLIDES = [
     {
@@ -1336,7 +1356,8 @@
       'home':renderHome,
       'timer':()=>`<div class="scroll-screen">${buildTimer()}</div>`,
       'relapse':()=>`<div class="scroll-screen">${renderRelapse()}</div>`,
-      'wisdom':renderWisdomScreen
+      'wisdom':renderWisdomScreen,
+      'help':renderHelp
     };
     el.innerHTML=(map[S.screen]||renderTypeSelection)();
 
@@ -1344,7 +1365,7 @@
     if(S.screen==='timer') startTimer();
     if(S.screen==='home') scrollChatToBottom();
 
-    const setupScreens=['onboarding','onboard-name','onboard-why','onboard-ai','onboard-mantra','type-selection'];
+    const setupScreens=['onboarding','onboard-name','onboard-why','onboard-ai','onboard-mantra','type-selection','help'];
     if(fab) fab.style.display=(S.type&&!setupScreens.includes(S.screen))?'flex':'none';
   }
 
@@ -1578,7 +1599,7 @@
 
   function saveAiAndContinue(){
     saveState();
-    S.screen='onboard-mantra'; render();
+    finishOnboarding();
   }
 
   function renderOnboardMantra(){
@@ -1748,14 +1769,6 @@
 
     S.chatMsgs.push({role:'user',text:msg,time:nowTime()});
 
-    // Добавляем настройку дня от ИИ-ассистента
-    const dayIndex = (new Date().getDay() + 6) % 7;
-    const dr = DAILY_REFLECTIONS[dayIndex];
-    // Показываем первые два абзаца + приглашение прочитать полностью
-    const preview = dr.full.split('\n\n').slice(0,2).join('\n\n');
-    const dailyMsg = `📖 *Настройка на ${dr.day}*\n\n${preview}\n\n— Нажми на карточку «📖 ${dr.day}» в шапке, чтобы прочитать полностью.`;
-    S.chatMsgs.push({role:'assistant', text:dailyMsg, time:nowTime()});
-
     saveChat();
     S.checkinData={mood:null,risk:null,note:''};
     S.screen='home'; _tab='chat';
@@ -1777,9 +1790,6 @@
     const greet = firstName ? `${timeWord}, ${firstName}` : timeWord;
     const streakTxt = d>0 ? `🔥 ${d} ${pluralDays(d)} без зависимости` : 'Начни серию сегодня';
     const today = new Date().toISOString().substring(0,10);
-    // Настройка на день недели
-    const dayIndex = (new Date().getDay() + 6) % 7; // 0=Пн, 6=Вс
-    const dr = DAILY_REFLECTIONS[dayIndex];
 
     // Ежедневная мудрость — меняется каждый день
     const dayOfYear = Math.floor((new Date()-new Date(new Date().getFullYear(),0,0))/86400000);
@@ -1802,14 +1812,6 @@
         <div class="home-greeting" style="flex:1">
           <div class="home-greeting-text">${greet}</div>
           <div class="home-greeting-sub">${streakTxt}</div>
-          <div onclick="openReflection()" style="margin-top:8px;padding:10px 13px;background:linear-gradient(135deg,rgba(245,158,11,.1),rgba(139,92,246,.06));border-radius:12px;border:1px solid rgba(245,158,11,.2);cursor:pointer;display:flex;gap:10px;align-items:flex-start">
-            <span style="font-size:16px;flex-shrink:0;margin-top:1px">📖</span>
-            <span style="flex:1">
-              <span style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(245,158,11,.7);margin-bottom:3px">${dr.day}</span>
-              <span style="font-size:12px;color:rgba(254,248,238,.6);line-height:1.5">${dr.short}</span>
-            </span>
-            <span style="font-size:14px;color:rgba(245,158,11,.4);flex-shrink:0;margin-top:2px">›</span>
-          </div>
           ${weeklyBannerHtml}
           ${dailyWisdomHtml}
         </div>
@@ -1870,9 +1872,6 @@
     return `<div class="chat-tab">
       <div class="chat-messages" id="chat-messages" style="display:flex;flex-direction:column;gap:10px">${msgs}${empty}</div>
       <div class="chat-input-area">
-        <button onclick="openVictoryModal()" title="Записать победу" style="width:42px;height:42px;border-radius:50%;background:rgba(251,191,36,.12);border:1.5px solid rgba(251,191,36,.3);font-size:18px;cursor:pointer;flex-shrink:0;transition:all .2s">✊</button>
-        <button onclick="openTriggerModal()" title="Записать триггер" style="width:42px;height:42px;border-radius:50%;background:rgba(239,68,68,.1);border:1.5px solid rgba(239,68,68,.25);font-size:18px;cursor:pointer;flex-shrink:0;transition:all .2s">⚡</button>
-        <button onclick="startUrgeSurfing()" title="Серфинг тяги" style="width:42px;height:42px;border-radius:50%;background:rgba(52,211,153,.12);border:1.5px solid rgba(52,211,153,.25);font-size:18px;cursor:pointer;flex-shrink:0;transition:all .2s">🌊</button>
         <textarea id="chat-input" class="chat-input" placeholder="Напиши мне..." rows="1"></textarea>
         <button class="btn-send" id="send-btn" onclick="sendChatMessage()">➤</button>
       </div>
@@ -1907,6 +1906,20 @@
         </div>
       </div>` : '';
     return `<div class="why-tab">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+        <button onclick="openVictoryModal()" style="padding:12px 10px;background:rgba(251,191,36,.08);border:1.5px solid rgba(251,191,36,.22);border-radius:16px;color:var(--text);font-family:var(--font);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;transition:all .2s">
+          <span style="font-size:22px">✊</span><span style="font-size:12px;font-weight:700">Победный момент</span>
+        </button>
+        <button onclick="openTriggerModal()" style="padding:12px 10px;background:rgba(239,68,68,.07);border:1.5px solid rgba(239,68,68,.2);border-radius:16px;color:var(--text);font-family:var(--font);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;transition:all .2s">
+          <span style="font-size:22px">⚡</span><span style="font-size:12px;font-weight:700">Записать триггер</span>
+        </button>
+        <button onclick="startUrgeSurfing()" style="padding:12px 10px;background:rgba(52,211,153,.07);border:1.5px solid rgba(52,211,153,.2);border-radius:16px;color:var(--text);font-family:var(--font);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;transition:all .2s">
+          <span style="font-size:22px">🌊</span><span style="font-size:12px;font-weight:700">Серфинг тяги</span>
+        </button>
+        <button onclick="navigate('relapse')" style="padding:12px 10px;background:rgba(244,63,94,.07);border:1.5px solid rgba(244,63,94,.2);border-radius:16px;color:var(--text);font-family:var(--font);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;transition:all .2s">
+          <span style="font-size:22px">💔</span><span style="font-size:12px;font-weight:700">Я сорвался</span>
+        </button>
+      </div>
       <div class="why-header">
         <h2>❤️ Мои причины</h2>
         <p>Ради чего ты останавливаешься?<br>Напиши своими словами — это твои якоря.</p>
@@ -2243,9 +2256,6 @@
         <button class="btn btn-outline btn-sm" onclick="exportData()">⬇️ Экспорт отчёта</button>
       </div>
 
-      <button onclick="navigate('relapse')" style="width:100%;padding:14px;background:rgba(244,63,94,.07);border:1.5px solid rgba(244,63,94,.25);border-radius:16px;color:rgba(244,63,94,.8);font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px">
-        💔 Я сорвался — нужна помощь
-      </button>
     </div>`;
   }
 
@@ -2773,9 +2783,8 @@
     const chatEl=document.getElementById('chat-messages');
     if(chatEl){const dot=document.createElement('div');dot.id='typing';dot.className='chat-msg assistant typing-indicator';dot.innerHTML='<div class="chat-bubble"><span></span><span></span><span></span></div>';chatEl.appendChild(dot);chatEl.scrollTop=chatEl.scrollHeight;}
     try{
-      const key=GROQ_API_KEY||S.apiKey; if(!key) throw new Error('NO_KEY');
       const sys=`Ты — ИИ-компаньон SANA для человека с зависимостью (${getTypeInfo().ai}). ${extraCtx}`;
-      const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'system',content:sys},{role:'user',content:'Напиши'}],max_tokens:400,temperature:0.8})});
+      const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'system',content:sys},{role:'user',content:'Напиши'}],max_tokens:400,temperature:0.8})});
       document.getElementById('typing')?.remove();
       if(!res.ok) throw new Error(res.status);
       const data=await res.json();
@@ -3050,10 +3059,8 @@
       document.getElementById('typing')?.remove();
       const m=e.message||'';
       let reply;
-      if(m==='NO_KEY'){
-        reply='Для работы чата нужен API ключ Groq (константа GROQ_API_KEY в коде).';
-      } else if(m.includes('401')){
-        reply='Ошибка ключа API. Проверь константу GROQ_API_KEY.';
+      if(m.includes('401')){
+        reply='Ошибка авторизации на сервере. Проверь настройки GROQ_API_KEY в Vercel.';
       } else {
         // Нет сети или другая ошибка — показываем офлайн-поддержку
         reply = OFFLINE_SUPPORT[Math.floor(Math.random()*OFFLINE_SUPPORT.length)];
@@ -3109,7 +3116,6 @@
   }
 
   async function callGroq(userMsg){
-    const key=GROQ_API_KEY||S.apiKey;if(!key)throw new Error('NO_KEY');
     const qs=getQ();
     const answeredLines=qs.filter(q=>S.answers[q.id]!=null&&S.answers[q.id]!=='').map(q=>{
       let v=String(S.answers[q.id]);
@@ -3236,7 +3242,7 @@ ${nameCtx}${profileCtx}${intentionCtx}${checkinCtx}${whyCtx}${distCtx}Серия
 Язык: русский. Без осуждения.${ctx}`;
 
     const history=S.chatMsgs.filter(m=>m.role==='user'||m.role==='assistant').slice(-10).map(m=>({role:m.role,content:m.text}));
-    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'system',content:sys},...history,{role:'user',content:userMsg}],max_tokens:320,temperature:0.75})});
+    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'system',content:sys},...history,{role:'user',content:userMsg}],max_tokens:320,temperature:0.75})});
     if(res.status===401)throw new Error('401');if(res.status===429)throw new Error('429: лимит запросов, подожди минуту');
     if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(`${res.status}: ${e.error?.message||res.statusText}`);}
     const data=await res.json();return data.choices[0].message.content;
@@ -3255,6 +3261,86 @@ ${nameCtx}${profileCtx}${intentionCtx}${checkinCtx}${whyCtx}${distCtx}Серия
     });
   });
 
+  // ── TOUR ──
+  const TOUR_STEPS = [
+    { icon:'💬', title:'Чат с ИИ', desc:'Главный инструмент. Пиши всё что беспокоит — ИИ-ассистент здесь 24/7. Без осуждения, без выходных.' },
+    { icon:'✊', title:'Победный момент', desc:'Кнопка ✊ рядом с полем ввода. Устоял перед тягой? Запиши — это останется как доказательство твоей силы.' },
+    { icon:'⚡', title:'Журнал триггеров', desc:'Кнопка ⚡ — записывай что провоцирует тягу. Со временем начнёшь видеть паттерны и перехватывать их заранее.' },
+    { icon:'🌊', title:'Серфинг тяги', desc:'Кнопка 🌊 — когда тяга накатывает волной. Таймер с дыхательными фазами поможет переждать. Тяга проходит сама.' },
+    { icon:'❤️', title:'Мои причины', desc:'Вкладка «Причины» внизу. Запиши ради чего остановился — это твои якоря в самые трудные моменты.' },
+    { icon:'🧭', title:'Философские линзы', desc:'Центральная кнопка навигации. Выбери традицию — буддизм, стоицизм, христианство и другие. ИИ говорит на её языке.' },
+    { icon:'📊', title:'Прогресс', desc:'Вкладка «Прогресс» — серия дней, достижения, история чекинов. Твой путь в цифрах.' },
+    { icon:'☀️', title:'Ежедневный чекин', desc:'Кнопка «☀️ Чекин» в шапке — утром и вечером. 30 секунд честности с собой. Это основа восстановления.' },
+  ];
+  let _tourStep = 0;
+
+  function showTour(){
+    _tourStep = 0;
+    renderTourCard();
+    document.getElementById('tour-overlay').classList.remove('hidden');
+  }
+  function closeTour(){
+    document.getElementById('tour-overlay').classList.add('hidden');
+    lss('sg_tour_done','1');
+  }
+  function tourNext(){
+    if(_tourStep < TOUR_STEPS.length - 1){ _tourStep++; renderTourCard(); }
+    else { closeTour(); }
+  }
+  function renderTourCard(){
+    const s = TOUR_STEPS[_tourStep];
+    const isLast = _tourStep === TOUR_STEPS.length - 1;
+    const dots = TOUR_STEPS.map((_,i)=>`<div class="tour-dot ${i===_tourStep?'active':''}"></div>`).join('');
+    document.getElementById('tour-card').innerHTML = `
+      <div class="tour-icon">${s.icon}</div>
+      <div class="tour-title">${s.title}</div>
+      <div class="tour-desc">${s.desc}</div>
+      <div class="tour-dots">${dots}</div>
+      <div class="tour-btns">
+        <button class="btn btn-ghost btn-sm" style="flex:1" onclick="closeTour()">Пропустить</button>
+        <button class="btn btn-primary" style="flex:2;font-weight:800" onclick="tourNext()">${isLast?'Начать! →':'Далее →'}</button>
+      </div>`;
+  }
+
+  // ── HELP SCREEN ──
+  function renderHelp(){
+    const items = [
+      { icon:'💬', title:'Чат с ИИ', desc:'Главный инструмент. Пиши всё что беспокоит — ИИ здесь 24/7, без осуждения.' },
+      { icon:'✊', title:'Победный момент', desc:'Кнопка ✊ в поле ввода чата. Фиксирует победы над тягой — твой личный журнал силы.' },
+      { icon:'⚡', title:'Журнал триггеров', desc:'Кнопка ⚡ — записывай что провоцирует тягу. Со временем видишь паттерны и перехватываешь их заранее.' },
+      { icon:'🌊', title:'Серфинг тяги', desc:'Кнопка 🌊 — таймер с дыхательными фазами когда тяга накатывает. Фазы: заметить → принять → дышать → отпустить.' },
+      { icon:'❤️', title:'Мои причины', desc:'Вкладка «Причины». Якоря — ради чего ты остановился. Читай в самые трудные моменты.' },
+      { icon:'🧭', title:'Философские линзы', desc:'Центральная кнопка навигации. 5 традиций: буддизм, стоицизм, христианство, экзистенциализм, индуизм. Выбери — ИИ говорит на её языке.' },
+      { icon:'📊', title:'Прогресс', desc:'Статистика серии, 14 достижений, история чекинов. Серия дней без зависимости — главная цифра.' },
+      { icon:'☀️', title:'Чекин', desc:'Утром и вечером — кнопка «☀️ Чекин» в шапке. Настроение, риск, заметка. ИИ отвечает персонально.' },
+      { icon:'📖', title:'Настройка дня', desc:'Карточка в шапке — ежедневная рефлексия по дням недели. Меняется каждый день.' },
+      { icon:'⚙️', title:'Настройки', desc:'Кнопка ⚙️ вверху справа. Имя, стиль ИИ, бэкап данных, смена типа зависимости.' },
+      { icon:'🚨', title:'Экстренная помощь', desc:'При мыслях о самоповреждении — напиши об этом в чат. Появится горячая линия: 8-800-2000-122, бесплатно 24/7.' },
+    ];
+    return `<div class="scroll-screen"><div style="padding:20px 20px 100px;max-width:480px;margin:0 auto">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
+        <button onclick="navigate('home')" style="width:38px;height:38px;border-radius:50%;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);font-size:20px;cursor:pointer;color:var(--text)">←</button>
+        <h2 style="font-size:20px;font-weight:900;margin:0">Как пользоваться SANA</h2>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        ${items.map(it=>`<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:18px;padding:16px 18px;display:flex;gap:14px;align-items:flex-start">
+          <div style="font-size:28px;flex-shrink:0;margin-top:2px">${it.icon}</div>
+          <div><div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:4px">${it.title}</div>
+          <div style="font-size:13px;color:var(--text-2);line-height:1.6">${it.desc}</div></div>
+        </div>`).join('')}
+      </div>
+      <div style="margin-top:16px;padding:14px 16px;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.15);border-radius:14px;text-align:center">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(245,158,11,.7);margin-bottom:4px">Экстренная помощь</div>
+        <div style="font-size:14px;font-weight:800;color:var(--text)">📞 8-800-2000-122</div>
+        <div style="font-size:12px;color:var(--text-2);margin-top:2px">Бесплатно, 24/7</div>
+      </div>
+      <button class="btn btn-primary btn-lg" style="width:100%;margin-top:16px" onclick="navigate('home')">← Назад в приложение</button>
+      <div style="text-align:center;margin-top:12px">
+        <button class="btn btn-ghost btn-sm" onclick="showTour()">🗺️ Показать тур заново</button>
+      </div>
+    </div></div>`;
+  }
+
   // ── BOOT ──
   loadState();
   if(!ls(SK.ONBOARDED)){S.screen='onboarding';}
@@ -3262,6 +3348,8 @@ ${nameCtx}${profileCtx}${intentionCtx}${checkinCtx}${whyCtx}${distCtx}Серия
   else if(!hasCheckinToday()&&S.chatMsgs.length===0){S.screen='checkin';}
   else{S.screen='home';}
   render();
+  // Показываем тур один раз после первого попадания на home
+  if(S.screen==='home' && !ls('sg_tour_done')) setTimeout(showTour, 900);
   // Проверяем milestone при каждом открытии
   if(S.type){
     setTimeout(checkMilestones, 1200);
