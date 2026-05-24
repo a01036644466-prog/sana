@@ -553,6 +553,10 @@
           </div>
         </div>
         <div class="setting-group">
+          <div class="setting-label">🔔 Напоминания</div>
+          <div id="s-notif"></div>
+        </div>
+        <div class="setting-group">
           <button class="btn btn-outline btn-sm" style="width:100%" onclick="closeSettings();navigate('help')">❓ Как пользоваться SANA</button>
           <button class="btn btn-outline btn-sm" style="width:100%;margin-top:6px" onclick="closeSettings();showTour()">🗺️ Показать тур заново</button>
         </div>
@@ -883,7 +887,8 @@
     WISDOM_LENS:'sg_wisdom_lens', EXPANDED:'sg_expanded', TRIGGERS:'sg_triggers',
     CHECKIN_EVE:'sg_checkin_eve',
     VICTORIES:'sg_victories', BEST_STREAK:'sg_best_streak',
-    ACHIEVEMENTS:'sg_achievements', WEEKLY_REVIEWS:'sg_weekly_reviews', LAST_WEEKLY:'sg_last_weekly'
+    ACHIEVEMENTS:'sg_achievements', WEEKLY_REVIEWS:'sg_weekly_reviews', LAST_WEEKLY:'sg_last_weekly',
+    NOTIF_ON:'sg_notif_on', NOTIF_TIME:'sg_notif_time', JOURNEY_START:'sg_journey_start'
   };
 
   const ACHIEVEMENTS = [
@@ -1200,7 +1205,8 @@
     aiStyle:'friend', aiLength:'medium', aiPronoun:'ty', aiFocus:'actions',
     wisdomLens:null, expandedTradition:null, triggers:[],
     victories:[], bestStreak:0, earnedAchievements:[], weeklyReviews:0, lastWeekly:'',
-    dangerDetected:false, lastEveCheckin:''
+    dangerDetected:false, lastEveCheckin:'',
+    notifEnabled:false, notifTime:'09:00', journeyStart:''
   };
 
   let _tab = 'chat';
@@ -1241,6 +1247,9 @@
       S.weeklyReviews     = parseInt(ls(SK.WEEKLY_REVIEWS)||'0')||0;
       S.lastWeekly        = ls(SK.LAST_WEEKLY)||'';
       S.triggers   = JSON.parse(ls(SK.TRIGGERS)||'[]');
+      S.notifEnabled = ls(SK.NOTIF_ON) === '1';
+      S.notifTime    = ls(SK.NOTIF_TIME) || '09:00';
+      S.journeyStart = ls(SK.JOURNEY_START) || '';
       S.aiStyle    = ls(SK.AI_STYLE)||'friend';
       S.aiLength   = ls(SK.AI_LENGTH)||'medium';
       S.aiPronoun  = ls(SK.AI_PRONOUN)||'ty';
@@ -1279,6 +1288,9 @@
       lss(SK.AI_PRONOUN,S.aiPronoun); lss(SK.AI_FOCUS,S.aiFocus);
       if(S.intention?.text) lss(SK.INTENTION,JSON.stringify(S.intention));
       lss(SK.MILESTONES,JSON.stringify(S.milestones));
+      lss(SK.NOTIF_ON, S.notifEnabled ? '1' : '0');
+      lss(SK.NOTIF_TIME, S.notifTime || '09:00');
+      if(S.journeyStart) lss(SK.JOURNEY_START, S.journeyStart);
     } catch(e){}
   }
 
@@ -1680,6 +1692,7 @@
   }
   function finishOnboarding(){
     lss(SK.ONBOARDED,'1');
+    if(!ls(SK.JOURNEY_START)){ const jd=new Date().toISOString().substring(0,10); lss(SK.JOURNEY_START,jd); S.journeyStart=jd; }
     setupWhyList = ['','',''];
     S.screen=S.type?'home':'type-selection';
     render();
@@ -1962,7 +1975,7 @@
         <button onclick="startUrgeSurfing()" style="padding:12px 10px;background:rgba(52,211,153,.07);border:1.5px solid rgba(52,211,153,.2);border-radius:16px;color:var(--text);font-family:var(--font);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;transition:all .2s">
           <span style="font-size:22px">🏄</span><span style="font-size:12px;font-weight:700">Пережить волну</span>
         </button>
-        <button onclick="navigate('relapse')" style="padding:12px 10px;background:rgba(244,63,94,.07);border:1.5px solid rgba(244,63,94,.2);border-radius:16px;color:var(--text);font-family:var(--font);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;transition:all .2s">
+        <button onclick="relapseDraft.severity=null;navigate('relapse')" style="padding:12px 10px;background:rgba(244,63,94,.07);border:1.5px solid rgba(244,63,94,.2);border-radius:16px;color:var(--text);font-family:var(--font);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;transition:all .2s">
           <span style="font-size:22px">💔</span><span style="font-size:12px;font-weight:700">Я сорвался</span>
         </button>
       </div>
@@ -2275,11 +2288,12 @@
         </div>
         <div style="flex:1;text-align:left">
           <div class="streak-num" style="font-size:52px!important;line-height:1">${d}</div>
-          <div class="streak-label" style="margin-top:2px">${pluralDays(d)} без игры</div>
+          <div class="streak-label" style="margin-top:2px">${pluralDays(d)} без зависимости</div>
           <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px">
             <div style="font-size:11px;color:rgba(255,255,255,.3)">До цели: ${nextM} дней</div>
-            ${S.bestStreak>0?`<div style="font-size:11px;color:rgba(251,191,36,.5)">🏅 Рекорд: ${S.bestStreak} ${pluralDays(S.bestStreak)}</div>`:''}
+            ${S.bestStreak>0?`<div style="font-size:11px;color:rgba(251,191,36,.5)">🏆 Рекорд: ${S.bestStreak} ${pluralDays(S.bestStreak)}</div>`:''}
           </div>
+          ${(()=>{ const jd=S.journeyStart?Math.floor((Date.now()-new Date(S.journeyStart).getTime())/86400000):0; return jd>1?`<div style="font-size:11px;color:rgba(245,158,11,.5);margin-top:3px">🗓️ В пути ${jd} ${pluralDays(jd)}</div>`:''; })()}
           <div style="height:4px;background:rgba(255,255,255,.1);border-radius:2px;margin-top:5px;overflow:hidden"><div style="height:100%;width:${(pct*100).toFixed(0)}%;background:linear-gradient(90deg,#ffbe0b,#ff6b9d);border-radius:2px;transition:width .8s ease"></div></div>
         </div>
       </div>
@@ -2720,7 +2734,7 @@
   }
 
   // ── RELAPSE PROTOCOL ──
-  let relapseDraft = { situation:'', emotion:null, emotionEmoji:null };
+  let relapseDraft = { situation:'', emotion:null, emotionEmoji:null, severity:null };
 
   function renderRelapse(){
     const feelings = [
@@ -2732,40 +2746,87 @@
       {id:'fear',     emoji:'😨', label:'Страх'}
     ];
     const sel = relapseDraft.emotion;
-    return `<div style="min-height:100%;display:flex;flex-direction:column;padding:28px 20px 32px;gap:22px;background:linear-gradient(160deg,rgba(244,63,94,.08) 0%,rgba(13,10,0,.95) 100%)">
+    const sev = relapseDraft.severity;
 
-      <div style="text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px">
-        <div style="font-size:64px;filter:drop-shadow(0 0 20px rgba(244,63,94,.3))">💔</div>
-        <h2 style="font-size:26px;font-weight:900;line-height:1.3">Это случилось.<br>Ты не один.</h2>
-        <p style="font-size:15px;color:var(--text-2);line-height:1.7;max-width:320px">Срыв — это не конец пути. Это часть него. Важно, что ты здесь и готов разобраться в этом.</p>
+    // Шаг 1 — выбор тяжести
+    if(!sev){
+      return `<div style="min-height:100%;display:flex;flex-direction:column;padding:28px 20px 32px;gap:20px;background:linear-gradient(160deg,rgba(244,63,94,.08) 0%,rgba(13,10,0,.95) 100%)">
+        <div style="text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px">
+          <div style="font-size:52px">💙</div>
+          <h2 style="font-size:24px;font-weight:900;line-height:1.3">Ты вернулся.<br>Это смелость.</h2>
+          <p style="font-size:15px;color:var(--text-2);line-height:1.7;max-width:300px">Расскажи что произошло — это поможет разобраться и двигаться дальше.</p>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <button onclick="setRelapseSeverity('slip')"
+            style="padding:20px 18px;background:#1a1200;border:2px solid rgba(245,158,11,.3);border-radius:20px;cursor:pointer;color:var(--text);font-family:var(--font);text-align:left;display:flex;gap:14px;align-items:flex-start;transition:all .2s"
+            onmouseover="this.style.borderColor='rgba(245,158,11,.7)'" onmouseout="this.style.borderColor='rgba(245,158,11,.3)'">
+            <span style="font-size:32px;flex-shrink:0">⚠️</span>
+            <div>
+              <div style="font-size:16px;font-weight:800;margin-bottom:4px">Почти сорвался</div>
+              <div style="font-size:13px;color:var(--text-2);line-height:1.5">Начал или сделал что-то частично, но остановился. Серия сохраняется — ты всё ещё держишься.</div>
+            </div>
+          </button>
+
+          <button onclick="setRelapseSeverity('relapse')"
+            style="padding:20px 18px;background:#1a1200;border:2px solid rgba(244,63,94,.25);border-radius:20px;cursor:pointer;color:var(--text);font-family:var(--font);text-align:left;display:flex;gap:14px;align-items:flex-start;transition:all .2s"
+            onmouseover="this.style.borderColor='rgba(244,63,94,.6)'" onmouseout="this.style.borderColor='rgba(244,63,94,.25)'">
+            <span style="font-size:32px;flex-shrink:0">💔</span>
+            <div>
+              <div style="font-size:16px;font-weight:800;margin-bottom:4px">Сорвался полностью</div>
+              <div style="font-size:13px;color:var(--text-2);line-height:1.5">Всё произошло. Это честно признать. Серия обнулится, но путь продолжается.</div>
+            </div>
+          </button>
+        </div>
+
+        <button class="btn btn-ghost" onclick="navigate('home')" style="margin-top:auto">← Назад</button>
+      </div>`;
+    }
+
+    // Шаг 2 — форма
+    const isSlip = sev === 'slip';
+    const accentColor = isSlip ? 'rgba(245,158,11' : 'rgba(244,63,94';
+    const icon = isSlip ? '⚠️' : '💔';
+    const title = isSlip ? 'Ты почти устоял' : 'Это случилось. Ты не один.';
+    const hint = isSlip
+      ? 'Серия сохраняется. Расскажи что произошло — разберёмся вместе.'
+      : 'Срыв — не конец пути. Важно, что ты вернулся.';
+
+    return `<div style="min-height:100%;display:flex;flex-direction:column;padding:28px 20px 32px;gap:20px;background:linear-gradient(160deg,rgba(244,63,94,.08) 0%,rgba(13,10,0,.95) 100%)">
+
+      <div style="text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px">
+        <div style="font-size:52px">${icon}</div>
+        <h2 style="font-size:22px;font-weight:900;line-height:1.3">${title}</h2>
+        <p style="font-size:14px;color:var(--text-2);line-height:1.6;max-width:300px">${hint}</p>
       </div>
 
-      <div style="background:#1a1200;border:1px solid rgba(244,63,94,.2);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:14px">
-        <div style="font-size:13px;font-weight:700;color:rgba(244,63,94,.8);text-transform:uppercase;letter-spacing:.08em">Что произошло?</div>
-        <textarea id="relapse-situation" class="textarea-input" style="min-height:90px;background:#221800;border-color:rgba(244,63,94,.2)" placeholder="Расскажи своими словами — когда, что случилось, что предшествовало..."></textarea>
+      <div style="background:#1a1200;border:1px solid ${accentColor},.2);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:12px">
+        <div style="font-size:12px;font-weight:700;color:${accentColor},.8);text-transform:uppercase;letter-spacing:.08em">Что произошло?</div>
+        <textarea id="relapse-situation" class="textarea-input" style="min-height:80px;background:#221800;border-color:${accentColor},.2)" placeholder="Расскажи своими словами — когда, что случилось, что предшествовало..."></textarea>
       </div>
 
-      <div style="background:#1a1200;border:1px solid rgba(244,63,94,.2);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:12px">
-        <div style="font-size:13px;font-weight:700;color:rgba(244,63,94,.8);text-transform:uppercase;letter-spacing:.08em">Что ты сейчас чувствуешь?</div>
+      <div style="background:#1a1200;border:1px solid ${accentColor},.2);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:10px">
+        <div style="font-size:12px;font-weight:700;color:${accentColor},.8);text-transform:uppercase;letter-spacing:.08em">Что сейчас чувствуешь?</div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
           ${feelings.map(f=>`<button onclick="selectRelapseFeeling('${f.id}','${f.emoji}',this)"
             class="relapse-feel-btn"
-            style="padding:12px 6px;background:${sel===f.id?'rgba(244,63,94,.2)':'#221800'};border:1.5px solid ${sel===f.id?'rgba(244,63,94,.6)':'rgba(244,63,94,.15)'};border-radius:14px;cursor:pointer;color:var(--text);font-family:var(--font);display:flex;flex-direction:column;align-items:center;gap:5px;transition:all .2s">
-            <span style="font-size:26px">${f.emoji}</span>
+            style="padding:10px 6px;background:${sel===f.id?'rgba(244,63,94,.2)':'#221800'};border:1.5px solid ${sel===f.id?'rgba(244,63,94,.6)':'rgba(244,63,94,.15)'};border-radius:14px;cursor:pointer;color:var(--text);font-family:var(--font);display:flex;flex-direction:column;align-items:center;gap:4px;transition:all .2s">
+            <span style="font-size:24px">${f.emoji}</span>
             <span style="font-size:11px;color:${sel===f.id?'var(--text)':'var(--text-2)'};font-weight:${sel===f.id?'700':'400'}">${f.label}</span>
           </button>`).join('')}
         </div>
       </div>
 
-      <div style="background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.15);border-radius:14px;padding:14px 16px;font-size:14px;color:rgba(245,158,11,.8);line-height:1.6">
-        💡 <strong>Помни:</strong> 95% людей, бросивших азартные игры, переживали срывы. Это не слабость — это нейробиология. Каждый раз, когда ты возвращаешься — ты становишься сильнее.
-      </div>
-
-      <button class="btn btn-primary btn-lg" onclick="submitRelapse()" style="background:linear-gradient(135deg,rgba(244,63,94,.8),rgba(190,18,60,.9)) !important">
+      <button class="btn btn-primary btn-lg" onclick="submitRelapse()" style="background:linear-gradient(135deg,${accentColor},.8),${isSlip?'rgba(180,83,9,.9)':'rgba(190,18,60,.9)'}) !important">
         Поговорить с ИИ об этом →
       </button>
-      <button class="btn btn-ghost" onclick="navigate('home')">Вернуться на главную</button>
+      <button class="btn btn-ghost" onclick="relapseDraft.severity=null;render()">← Изменить выбор</button>
     </div>`;
+  }
+
+  function setRelapseSeverity(sev){
+    relapseDraft.severity = sev;
+    render();
   }
 
   function selectRelapseFeeling(id, emoji, btn){
@@ -2779,49 +2840,64 @@
 
   function submitRelapse(){
     const sit = (document.getElementById('relapse-situation')?.value||'').trim();
+    const isSlip = relapseDraft.severity === 'slip';
+    const feelingLabels = {shame:'стыд',anger:'злость',emptiness:'пустота',relief:'облегчение',sadness:'грусть',fear:'страх'};
 
-    // Сохраняем срыв в историю
     const entry = {
       id: Date.now(),
       date: new Date().toISOString(),
       type: S.type,
-      result: 'played',
-      q1: sit || 'срыв',
+      result: isSlip ? 'slip' : 'played',
+      q1: sit || (isSlip ? 'частичный срыв' : 'срыв'),
       lost: 0,
       answers: {},
-      isRelapse: true
+      isRelapse: !isSlip,
+      isSlip: isSlip
     };
     S.history.unshift(entry);
-    S.stats.play++;
 
-    // Сбрасываем серию
-    S.streak = { start: null };
+    const streakWas = getStreakDays();
+    const bestWas = S.bestStreak;
+
+    if(isSlip){
+      // Частичный: серия сохраняется, обновляем рекорд
+      updateBestStreak();
+    } else {
+      // Полный: сохраняем рекорд ДО сброса
+      if(streakWas > S.bestStreak){ S.bestStreak = streakWas; lss(SK.BEST_STREAK, streakWas.toString()); }
+      S.stats.play++;
+      S.streak = { start: null };
+    }
 
     saveHistory();
     saveState();
 
-    // Строим сообщение для ИИ
-    const feelingLabels = {shame:'стыд',anger:'злость',emptiness:'пустота',relief:'облегчение',sadness:'грусть',fear:'страх'};
-    let msg = '💔 Я сорвался. ';
+    // Сообщение пользователя в чат
+    let msg = isSlip ? '⚠️ Я почти сорвался — начал, но остановил себя. ' : '💔 Я сорвался. ';
     if(sit) msg += `Вот что произошло: "${sit}". `;
     if(relapseDraft.emotion) msg += `Сейчас я чувствую ${relapseDraft.emotionEmoji} ${feelingLabels[relapseDraft.emotion]||relapseDraft.emotion}. `;
-    msg += 'Помоги мне разобраться в этом и понять, как двигаться дальше.';
+    msg += isSlip ? 'Помоги разобраться, как это предотвратить в следующий раз.' : 'Помоги мне разобраться в этом и понять, как двигаться дальше.';
 
     S.chatMsgs.push({role:'user', text: msg, time: nowTime()});
 
-    // Специальное сообщение от ИИ (без API — немедленная поддержка)
-    const streakWas = getStreakDays();
-    const immediateSupport = `${relapseDraft.emotionEmoji || '💙'} Я здесь. Ты сделал очень важный шаг — вернулся и рассказал. Это требует смелости.\n\nСрыв — это не обнуление всего пути. ${streakWas > 0 ? `Ты держался ${streakWas} ${pluralDays(streakWas)} — это реальный результат, который никуда не исчез.` : 'Каждое возвращение — это сила.'}\n\nРасскажи мне больше — что сейчас происходит у тебя внутри?`;
+    // Немедленная поддержка от ИИ
+    let immediateSupport;
+    if(isSlip){
+      immediateSupport = `${relapseDraft.emotionEmoji || '💙'} Стоп. Ты сделал то, что большинство не может — остановил себя.\n\nЭто не срыв. Это победа, даже если сейчас так не ощущается.\n\n🔥 Твоя серия продолжается: ${streakWas} ${pluralDays(streakWas)}.\n\nРасскажи мне — что именно произошло? Разберём триггер вместе.`;
+    } else {
+      const bestLine = S.bestStreak > 0 ? `\n\n🏆 Твой рекорд: ${S.bestStreak} ${pluralDays(S.bestStreak)} — он остаётся навсегда.` : '';
+      const streakLine = streakWas > 0 ? `Ты держался ${streakWas} ${pluralDays(streakWas)} — это реальный результат, который никуда не исчез.` : 'Каждое возвращение — это сила.';
+      immediateSupport = `${relapseDraft.emotionEmoji || '💙'} Я здесь. Ты сделал важный шаг — вернулся и рассказал.\n\n${streakLine}${bestLine}\n\nРасскажи мне больше — что сейчас происходит у тебя внутри?`;
+    }
     S.chatMsgs.push({role:'assistant', text: immediateSupport, time: nowTime()});
 
     saveChat();
-    relapseDraft = { situation:'', emotion:null, emotionEmoji:null };
+    relapseDraft = { situation:'', emotion:null, emotionEmoji:null, severity:null };
 
-    S.crisisMode = true; // Активируем режим поддержки
+    S.crisisMode = true;
     _tab = 'chat';
     navigate('home');
 
-    // Через секунду ИИ отвечает персонально
     setTimeout(()=>aiRespond(msg), 1000);
   }
 
@@ -3121,7 +3197,8 @@
     const t=getTypeInfo();
     document.getElementById('s-type').textContent=S.type?`${t.emoji} ${t.name}`:'Не выбран';
     const sd=document.getElementById('s-stats');
-    if(sd)sd.innerHTML=`<div class="stats-display-row">🔥 Дней без зависимости: <strong>${getStreakDays()}</strong></div><div class="stats-display-row">⏸️ Отложил: <strong>${S.stats.postpone}</strong></div><div class="stats-display-row">🎮 Сыграл: <strong>${S.stats.play}</strong></div>`;
+    const jDays = S.journeyStart ? Math.floor((Date.now()-new Date(S.journeyStart).getTime())/86400000) : 0;
+    if(sd)sd.innerHTML=`<div class="stats-display-row">🔥 Дней без зависимости: <strong>${getStreakDays()}</strong></div>${S.bestStreak>0?`<div class="stats-display-row">🏆 Лучшая серия: <strong>${S.bestStreak}</strong></div>`:''}${jDays>0?`<div class="stats-display-row">🗓️ Дней в пути: <strong>${jDays}</strong></div>`:''}<div class="stats-display-row">⏸️ Отложил: <strong>${S.stats.postpone}</strong></div><div class="stats-display-row">🎮 Сыграл: <strong>${S.stats.play}</strong></div>`;
     const al=document.getElementById('alt-list');
     if(al){const list=S.alternatives.length>0?S.alternatives:[...DEFAULT_ALTERNATIVES];al.innerHTML=list.map((a,i)=>`<div class="alt-item"><input type="text" class="input alt-input" value="${esc(a)}" onchange="updateAlt(${i},this.value)" placeholder="Занятие..."><button class="btn-icon" onclick="removeAlt(${i})">✕</button></div>`).join('');}
     const sn=document.getElementById('s-name'); if(sn) sn.value=S.name||'';
@@ -3129,6 +3206,7 @@
     const lengthNames={short:'Коротко',medium:'Средне',long:'Развёрнуто'};
     const sai=document.getElementById('s-ai-info');
     if(sai) sai.innerHTML=`${styleNames[S.aiStyle]||'🤝 Друг'} &nbsp;·&nbsp; ${lengthNames[S.aiLength]||'Средне'} &nbsp;·&nbsp; ${S.aiPronoun==='vy'?'На «вы»':'На «ты»'} &nbsp;·&nbsp; ${S.aiFocus==='questions'?'Вопросы':'Действия'}`;
+    renderNotifBlock();
     document.getElementById('settings-modal').classList.remove('hidden');
   }
 
@@ -3518,6 +3596,55 @@ ${nameCtx}${profileCtx}${intentionCtx}${checkinCtx}${whyCtx}${distCtx}Серия
     </div></div>`;
   }
 
+  // ── NOTIFICATIONS ──
+  function scheduleNextNotif(){
+    if(!S.notifEnabled || Notification.permission !== 'granted') return;
+    const [h,m] = (S.notifTime||'09:00').split(':').map(Number);
+    const now = new Date();
+    const next = new Date(); next.setHours(h,m,0,0);
+    if(next <= now) next.setDate(next.getDate()+1);
+    const ms = next - now;
+    navigator.serviceWorker?.ready.then(reg => reg.active?.postMessage({type:'schedule', ms, body:'Как ты сегодня? Не забудь про чекин 🌟'}));
+  }
+
+  async function toggleNotifications(){
+    if(!('Notification' in window)){ showToast('Уведомления не поддерживаются'); return; }
+    if(S.notifEnabled){
+      S.notifEnabled=false;
+      navigator.serviceWorker?.ready.then(r=>r.active?.postMessage({type:'cancel'}));
+      saveState(); renderNotifBlock(); showToast('Уведомления отключены'); return;
+    }
+    const perm = await Notification.requestPermission();
+    if(perm==='granted'){
+      S.notifEnabled=true; saveState(); scheduleNextNotif(); renderNotifBlock(); showToast('Уведомления включены ✓');
+    } else {
+      showToast('Разрешите уведомления в настройках браузера');
+    }
+  }
+
+  function setNotifTime(val){
+    S.notifTime=val; saveState();
+    if(S.notifEnabled) scheduleNextNotif();
+  }
+
+  function renderNotifBlock(){
+    const el=document.getElementById('s-notif'); if(!el) return;
+    if(!('Notification' in window)){
+      el.innerHTML='<div style="font-size:12px;color:var(--text-2)">Ваш браузер не поддерживает уведомления</div>'; return;
+    }
+    if(S.notifEnabled && Notification.permission==='granted'){
+      el.innerHTML=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <span style="font-size:13px;color:var(--text-2)">Напоминание каждый день в:</span>
+        <input type="time" value="${S.notifTime||'09:00'}" onchange="setNotifTime(this.value)"
+          style="background:#221800;border:1px solid rgba(245,158,11,.3);border-radius:8px;padding:4px 8px;color:var(--text);font-size:14px;font-family:var(--font)">
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="toggleNotifications()">🔕 Отключить</button>`;
+    } else {
+      el.innerHTML=`<div style="font-size:12px;color:var(--text-2);line-height:1.5;margin-bottom:8px">Напоминание о чекине каждый день. Работает когда приложение добавлено на главный экран.</div>
+      <button class="btn btn-outline btn-sm" onclick="toggleNotifications()">🔔 Включить напоминания</button>`;
+    }
+  }
+
   // ── BOOT ──
   loadState();
   if(!ls(SK.ONBOARDED)){S.screen='onboarding';}
@@ -3531,6 +3658,15 @@ ${nameCtx}${profileCtx}${intentionCtx}${checkinCtx}${whyCtx}${distCtx}Серия
   if(S.type){
     setTimeout(checkMilestones, 1200);
     setTimeout(()=>{ updateBestStreak(); checkAchievements(); }, 1500);
+  }
+  // SW + уведомления — после loadState
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('/sw.js').then(()=>{ setTimeout(scheduleNextNotif, 1000); }).catch(()=>{});
+  }
+  // journeyStart для старых пользователей (кто уже прошёл онбординг)
+  if(ls(SK.ONBOARDED) && !ls(SK.JOURNEY_START)){
+    const jd = S.streak?.start || new Date().toISOString().substring(0,10);
+    lss(SK.JOURNEY_START, jd); S.journeyStart = jd;
   }
   </script>
   <div class="toast" id="toast"></div>
