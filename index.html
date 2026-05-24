@@ -7,18 +7,21 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="SANA">
   <title>SANA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg: #0d0a00; --bg-card: #1a1200; --bg-card2: #211800;
-      --accent: #f59e0b; --accent-dark: #d97706; --accent-glow: rgba(245,158,11,0.35);
+      --bg: #0d0900; --bg-card: rgba(42,28,0,0.62); --bg-card2: rgba(35,22,0,0.9);
+      --accent: #f59e0b; --accent-dark: #d97706; --accent-glow: rgba(245,158,11,0.4);
       --rose: #fb7185; --teal: #34d399;
       --success: #34d399; --danger: #f43f5e; --warning: #fbbf24; --gold: #fcd34d;
-      --text: #fef8ee; --text-2: rgba(254,248,238,0.55); --text-3: rgba(254,248,238,0.25);
-      --border: rgba(245,158,11,0.12); --border-hi: rgba(245,158,11,0.22);
+      --text: #fef8ee; --text-2: rgba(254,248,238,0.65); --text-3: rgba(254,248,238,0.32);
+      --border: rgba(245,158,11,0.28); --border-hi: rgba(245,158,11,0.48);
       --r: 20px; --r-sm: 14px;
       --shadow: 0 8px 32px rgba(0,0,0,0.6); --shadow-sm: 0 2px 12px rgba(0,0,0,0.4);
-      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --card-shadow: 0 4px 28px rgba(0,0,0,0.55), inset 0 1px 0 rgba(245,158,11,0.14), 0 0 0 1px rgba(245,158,11,0.04);
+      --font: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
     }
     @keyframes fadeInUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
     @keyframes scalePop { 0%{transform:scale(.85);opacity:0} 100%{transform:scale(1);opacity:1} }
@@ -26,7 +29,7 @@
     @keyframes ambientFlicker { 0%,100%{opacity:.6} 50%{opacity:.9} }
     @keyframes tdot { 0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-5px);opacity:1} }
     @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
-    html, body { height: 100%; font-family: var(--font); background: #0d0a00; background-image: radial-gradient(ellipse at 30% 0%, rgba(245,158,11,.1) 0%, transparent 55%), radial-gradient(ellipse at 70% 100%, rgba(251,113,133,.07) 0%, transparent 50%); color: var(--text); overflow: hidden; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; }
+    html, body { height: 100%; font-family: var(--font); background: #0d0900; background-image: radial-gradient(ellipse at 20% -5%, rgba(245,158,11,.48) 0%, transparent 45%), radial-gradient(ellipse at 80% 105%, rgba(251,113,133,.28) 0%, transparent 45%), radial-gradient(ellipse at 50% 50%, rgba(245,158,11,.06) 0%, transparent 65%); color: var(--text); overflow: hidden; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; letter-spacing: -0.01em; }
     #app { height: 100%; display: flex; flex-direction: column; }
     #screen { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 
@@ -36,7 +39,7 @@
     /* ===== ONBOARDING ===== */
     .onboard-screen { min-height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 24px; gap: 24px; text-align: center; position: relative; }
     .onboard-skip { position: absolute; top: 16px; right: 16px; background: none; border: none; color: var(--text-3); font-size: 14px; cursor: pointer; font-family: var(--font); }
-    .onboard-icon { font-size: 80px; line-height: 1; }
+    .onboard-icon { width:112px; height:112px; border-radius:30px; display:flex; align-items:center; justify-content:center; font-size:56px; line-height:1; background:linear-gradient(145deg,rgba(245,158,11,.2),rgba(245,158,11,.06)); border:1px solid rgba(245,158,11,.22); box-shadow:0 8px 32px rgba(245,158,11,.15),inset 0 1px 0 rgba(255,255,255,.07); }
     .onboard-title { font-size: 28px; font-weight: 800; }
     .onboard-text { font-size: 16px; color: var(--text-2); line-height: 1.7; max-width: 320px; }
     .onboard-dots { display: flex; gap: 8px; }
@@ -50,8 +53,8 @@
     .app-subtitle { color: var(--text-2); font-size: 15px; line-height: 1.6; text-align: center; }
     .type-section { width: 100%; max-width: 400px; }
     .type-section-title { font-size: 14px; color: var(--text-2); text-align: center; margin-bottom: 14px; }
-    .type-card { display: flex; align-items: center; gap: 16px; background: var(--bg-card); border: 1.5px solid var(--border); border-radius: var(--r); padding: 20px; cursor: pointer; transition: all 0.2s; color: var(--text); width: 100%; margin-bottom: 10px; }
-    .type-card:hover { background: var(--bg-card2); border-color: var(--accent); transform: translateY(-2px); }
+    .type-card { display: flex; align-items: center; gap: 16px; background: var(--bg-card); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: var(--r); padding: 20px; cursor: pointer; transition: all 0.22s; color: var(--text); width: 100%; margin-bottom: 10px; box-shadow: var(--card-shadow); }
+    .type-card:hover { border-color: rgba(245,158,11,.55); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,.5), 0 0 20px rgba(245,158,11,.18), 0 0 0 1px rgba(245,158,11,.2); background: rgba(55,36,0,0.68); }
     .type-card-icon { font-size: 36px; }
     .type-card-content { flex: 1; text-align: left; }
     .type-card-title { font-size: 17px; font-weight: 700; margin-bottom: 3px; }
@@ -63,7 +66,7 @@
     .checkin-icon { font-size: 56px; }
     .checkin-title { font-size: 26px; font-weight: 800; text-align: center; }
     .checkin-subtitle { font-size: 15px; color: var(--text-2); text-align: center; }
-    .checkin-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--r); padding: 20px; width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 14px; }
+    .checkin-card { background: var(--bg-card); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: var(--r); padding: 20px; width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 14px; box-shadow: var(--card-shadow); }
     .checkin-q { font-size: 16px; font-weight: 600; }
     .risk-row { display: flex; gap: 10px; }
     .risk-btn { flex: 1; padding: 12px; border-radius: var(--r-sm); border: 2px solid var(--border); background: var(--bg-card2); color: var(--text-2); font-size: 15px; font-weight: 600; cursor: pointer; font-family: var(--font); transition: all 0.2s; }
@@ -74,11 +77,11 @@
 
     /* ===== HOME SCREEN ===== */
     .home-screen { flex: 1; min-height: 0; display: flex; flex-direction: column; }
-    .home-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px 8px; flex-shrink: 0; gap: 8px; }
+    .home-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 10px; flex-shrink: 0; gap: 8px; border-bottom: 1px solid rgba(245,158,11,.08); }
     .home-greeting { flex: 1; }
     .home-greeting-text { font-size: 15px; font-weight: 700; }
     .home-greeting-sub { font-size: 12px; color: var(--text-2); margin-top: 2px; }
-    .streak-pill { display: inline-flex; align-items: center; gap: 5px; background: linear-gradient(135deg,rgba(124,111,255,.2),rgba(255,107,157,.2)); border: 1px solid rgba(124,111,255,.4); border-radius: 20px; padding: 4px 10px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+    .streak-pill { display: inline-flex; align-items: center; gap: 5px; background: linear-gradient(135deg,rgba(245,158,11,.18),rgba(251,113,133,.12)); border: 1px solid rgba(245,158,11,.3); border-radius: 20px; padding: 5px 12px; font-size: 12px; font-weight: 800; white-space: nowrap; box-shadow: 0 2px 10px rgba(245,158,11,.2); letter-spacing: 0.01em; }
     .tab-content { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 
     /* Chat tab */
@@ -88,18 +91,19 @@
     .chat-msg.user { align-self: flex-end; align-items: flex-end; }
     .chat-msg.assistant { align-self: flex-start; align-items: flex-start; }
     .chat-bubble { padding: 10px 14px; border-radius: 18px; font-size: 15px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
-    .chat-msg.user .chat-bubble { background: var(--accent); color: #fff; border-bottom-right-radius: 4px; }
-    .chat-msg.assistant .chat-bubble { background: var(--bg-card); color: var(--text); border-bottom-left-radius: 4px; border: 1px solid var(--border); }
+    .chat-msg.user .chat-bubble { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; border-bottom-right-radius: 4px; box-shadow: 0 2px 12px rgba(245,158,11,.35); }
+    .chat-msg.assistant .chat-bubble { background: rgba(26,18,0,0.75); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); color: var(--text); border-bottom-left-radius: 4px; border: 1px solid rgba(245,158,11,.18); box-shadow: 0 2px 12px rgba(0,0,0,.35); }
     .chat-time { font-size: 10px; color: var(--text-3); margin-top: 3px; padding: 0 4px; }
     .typing-indicator .chat-bubble { display: flex; gap: 5px; align-items: center; padding: 13px 15px; }
     .typing-indicator .chat-bubble span { width: 7px; height: 7px; border-radius: 50%; background: var(--text-3); animation: tdot 1.2s infinite; }
     .typing-indicator .chat-bubble span:nth-child(2) { animation-delay: .2s; }
     .typing-indicator .chat-bubble span:nth-child(3) { animation-delay: .4s; }
     @keyframes tdot { 0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-6px);opacity:1} }
-    .chat-input-area { display: flex; gap: 8px; padding: 10px 12px; border-top: 1px solid var(--border); align-items: flex-end; flex-shrink: 0; }
+    .chat-input-area { display: flex; gap: 8px; padding: 10px 12px; border-top: 1px solid rgba(245,158,11,.12); background: rgba(13,10,0,0.6); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); align-items: flex-end; flex-shrink: 0; }
     .chat-input { flex: 1; background: var(--bg-card2); border: 1.5px solid var(--border); border-radius: 22px; color: var(--text); font-size: 15px; padding: 10px 14px; resize: none; outline: none; font-family: var(--font); max-height: 100px; overflow-y: auto; line-height: 1.4; transition: border-color .2s; }
     .chat-input:focus { border-color: var(--accent); }
-    .btn-send { background: var(--accent); border: none; border-radius: 50%; width: 42px; height: 42px; font-size: 16px; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .btn-send { background: linear-gradient(135deg, #f59e0b, #d97706); border: none; border-radius: 50%; width: 42px; height: 42px; font-size: 16px; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 3px 12px rgba(245,158,11,.4); transition: transform .15s, box-shadow .15s; }
+    .btn-send:active:not(:disabled) { transform: scale(.93); box-shadow: 0 1px 6px rgba(245,158,11,.3); }
     .btn-send:disabled { opacity: .5; }
 
     /* Why tab */
@@ -108,7 +112,7 @@
     .why-header h2 { font-size: 22px; font-weight: 800; margin-bottom: 6px; }
     .why-header p { font-size: 14px; color: var(--text-2); line-height: 1.5; }
     .why-empty { text-align: center; padding: 32px 16px; color: var(--text-3); font-size: 15px; line-height: 1.7; }
-    .why-item { display: flex; align-items: center; gap: 10px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 4px 4px 4px 16px; }
+    .why-item { display: flex; align-items: center; gap: 10px; background: var(--bg-card); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 4px 4px 4px 16px; box-shadow: 0 2px 10px rgba(0,0,0,.3); }
     .why-text-input { flex: 1; background: none; border: none; color: var(--text); font-size: 15px; font-family: var(--font); outline: none; padding: 10px 0; }
     .why-text-input::placeholder { color: var(--text-3); }
 
@@ -119,7 +123,7 @@
     .streak-label { font-size: 14px; color: var(--text-2); margin-top: 4px; }
     .streak-sublabel { font-size: 12px; color: var(--text-3); margin-top: 2px; }
     .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 16px; text-align: center; }
+    .stat-card { background: var(--bg-card); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 16px; text-align: center; box-shadow: var(--card-shadow); }
     .stat-num { font-size: 28px; font-weight: 800; color: var(--text); }
     .stat-lbl { font-size: 12px; color: var(--text-2); margin-top: 4px; }
     .prog-btn-row { display: flex; flex-direction: column; gap: 8px; }
@@ -127,13 +131,13 @@
     .lost-title { font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--danger); font-weight: 700; margin-bottom: 6px; }
     .lost-amount { font-size: 28px; font-weight: 800; }
     .lost-context { font-size: 13px; color: var(--text-2); margin-top: 4px; }
-    .checkin-history-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 14px 16px; }
+    .checkin-history-card { background: var(--bg-card); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 14px 16px; box-shadow: var(--card-shadow); }
     .chi-title { font-size: 12px; text-transform: uppercase; letter-spacing: .1em; color: var(--text-3); font-weight: 700; margin-bottom: 10px; }
     .chi-row { display: flex; align-items: center; justify-content: space-between; padding: 4px 0; font-size: 14px; border-bottom: 1px solid var(--border); }
     .chi-row:last-child { border-bottom: none; }
 
     /* ===== BOTTOM NAV ===== */
-    .bottom-nav { display: flex; align-items: center; background: var(--bg-card); border-top: 1px solid var(--border); flex-shrink: 0; position: relative; padding-bottom: env(safe-area-inset-bottom, 0px); }
+    .bottom-nav { display: flex; align-items: center; background: rgba(13,10,0,0.85); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-top: 1px solid rgba(245,158,11,.14); flex-shrink: 0; position: relative; padding-bottom: env(safe-area-inset-bottom, 0px); }
     .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 10px 4px; background: none; border: none; color: var(--text-3); font-size: 10px; font-family: var(--font); cursor: pointer; transition: color .2s; }
     .nav-btn.active { color: var(--accent); }
     .nav-btn-icon { font-size: 22px; line-height: 1; }
@@ -150,7 +154,7 @@
     .progress-bar { flex: 1; height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
     .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), #ff6b9d); border-radius: 3px; transition: width .4s ease; }
     .progress-text { font-size: 13px; color: var(--text-2); font-weight: 700; }
-    .question-card { background: var(--bg-card); border-radius: var(--r); padding: 22px 18px; border: 1px solid var(--border); flex: 1; display: flex; flex-direction: column; }
+    .question-card { background: var(--bg-card); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: var(--r); padding: 22px 18px; border: 1px solid var(--border); flex: 1; display: flex; flex-direction: column; box-shadow: var(--card-shadow); }
     .question-number { font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--accent); margin-bottom: 12px; font-weight: 700; }
     .question-text { font-size: 19px; font-weight: 700; line-height: 1.45; margin-bottom: 6px; }
     .question-hint { font-size: 13px; color: var(--text-2); font-style: italic; line-height: 1.5; }
@@ -192,7 +196,7 @@
     .summary-screen { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
     .summary-header { text-align: center; padding: 8px 0; }
     .summary-title { font-size: 26px; font-weight: 800; margin-bottom: 4px; }
-    .answer-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 13px 15px; }
+    .answer-card { background: var(--bg-card); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 13px 15px; box-shadow: var(--card-shadow); }
     .answer-q-num { font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--accent); margin-bottom: 3px; font-weight: 700; }
     .answer-q-text { font-size: 13px; color: var(--text-2); margin-bottom: 5px; line-height: 1.4; }
     .answer-value { font-size: 15px; font-weight: 600; word-break: break-word; line-height: 1.5; }
@@ -211,7 +215,7 @@
     .pattern-bar-fill { height: 100%; background: linear-gradient(90deg,rgba(124,111,255,.4),rgba(255,107,157,.3)); border-radius: 6px; }
     .pattern-bar-text { position: absolute; inset: 0; display: flex; align-items: center; padding: 0 8px; font-size: 12px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .pattern-count { font-size: 12px; color: var(--text-3); }
-    .stats-block { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--r); padding: 14px; }
+    .stats-block { background: var(--bg-card); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--border); border-radius: var(--r); padding: 14px; box-shadow: var(--card-shadow); }
     .stats-block-title { font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--text-3); font-weight: 700; margin-bottom: 10px; }
     .stat-row { display: flex; align-items: center; gap: 10px; font-size: 14px; padding: 3px 0; }
     .decision-buttons { display: flex; flex-direction: column; gap: 10px; }
@@ -235,6 +239,16 @@
     .urge-progress-fill { height:100%; border-radius:3px; transition:width .5s ease, background .8s; }
     .urge-progress-label { font-size:12px; color:var(--text-3); text-align:right; }
     .urge-actions { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; }
+    @keyframes breathePulse { 0%{transform:scale(1);opacity:.85} 28.6%{transform:scale(1.22);opacity:1} 57.1%{transform:scale(1.22);opacity:1} 100%{transform:scale(1);opacity:.85} }
+    .breathe-anim { animation:breathePulse 14s ease-in-out infinite; }
+    .urge-breathe-label { font-size:20px; font-weight:900; letter-spacing:.1em; text-transform:uppercase; min-height:28px; transition:color .4s; }
+    .ttt-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; width:210px; }
+    .ttt-cell { width:62px; height:62px; border-radius:16px; background:rgba(255,255,255,.06); border:1.5px solid rgba(255,255,255,.12); cursor:pointer; transition:all .15s; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:26px; }
+    .ttt-cell:hover:not(:disabled) { background:rgba(255,255,255,.13); transform:scale(1.06); }
+    .ttt-cell:disabled { cursor:default; }
+    .urge-anchor-card { padding:22px 28px; background:rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.28); border-radius:22px; max-width:300px; width:100%; text-align:center; animation:fadeInUp .4s ease; }
+    .urge-anchor-num { font-size:11px; color:rgba(245,158,11,.6); font-weight:700; text-transform:uppercase; letter-spacing:.12em; margin-bottom:10px; }
+    .urge-anchor-text { font-size:19px; font-weight:700; line-height:1.55; }
     .crisis-banner { background:rgba(244,63,94,.08); border:1px solid rgba(244,63,94,.2); border-radius:14px; padding:10px 14px; display:flex; align-items:center; gap:10px; margin:0 14px 2px; font-size:13px; color:rgba(254,248,238,.7); flex-shrink:0; }
     .crisis-surf-btn { background:linear-gradient(135deg,#34d399,#059669); border:none; border-radius:12px; padding:10px 16px; font-size:14px; font-weight:700; color:#fff; cursor:pointer; flex-shrink:0; transition:all .2s; box-shadow:0 4px 12px rgba(52,211,153,.3); }
     .crisis-surf-btn:hover { transform:scale(1.04); }
@@ -244,20 +258,20 @@
     .timer-display { font-size: 76px; font-weight: 800; font-variant-numeric: tabular-nums; background: linear-gradient(135deg, var(--accent), #ff6b9d); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1; letter-spacing: -2px; }
     .timer-urgent { background: linear-gradient(135deg, var(--warning), var(--danger)) !important; -webkit-background-clip: text; background-clip: text; }
     .timer-done { font-size: 30px !important; letter-spacing: 0 !important; }
-    .quote-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--r); padding: 18px 20px; max-width: 380px; width: 100%; }
+    .quote-card { background: var(--bg-card); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--border); border-radius: var(--r); padding: 18px 20px; max-width: 380px; width: 100%; box-shadow: var(--card-shadow); }
     .quote-text { font-size: 16px; font-style: italic; line-height: 1.65; }
     .alternative-card { background: rgba(124,111,255,.1); border: 1px solid rgba(124,111,255,.3); border-radius: var(--r-sm); padding: 14px 18px; max-width: 380px; width: 100%; }
     .alternative-label { font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--accent); font-weight: 700; margin-bottom: 5px; }
     .alternative-text { font-size: 16px; font-weight: 600; }
     .timer-actions { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 380px; }
     .timer-toggle-row { display: flex; gap: 8px; width: 100%; max-width: 380px; }
-    .breath-section { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--r); padding: 18px; max-width: 380px; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+    .breath-section { background: var(--bg-card); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--border); border-radius: var(--r); padding: 18px; max-width: 380px; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 14px; box-shadow: var(--card-shadow); }
     .breath-ring { width: 130px; height: 130px; border-radius: 50%; border: 3px solid var(--accent); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; transition: transform 1s ease-in-out; }
     .breath-phase { font-size: 15px; font-weight: 700; color: var(--accent); }
     .breath-sub { font-size: 11px; color: var(--text-2); text-align: center; }
     .breath-cnt { font-size: 30px; font-weight: 800; font-variant-numeric: tabular-nums; }
     .breath-hint { font-size: 12px; color: var(--text-3); text-align: center; line-height: 1.5; }
-    .gestalt-section { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--r); padding: 16px; max-width: 380px; width: 100%; }
+    .gestalt-section { background: var(--bg-card); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--border); border-radius: var(--r); padding: 16px; max-width: 380px; width: 100%; box-shadow: var(--card-shadow); }
     .gestalt-title { font-size: 13px; font-weight: 700; color: var(--accent); margin-bottom: 12px; text-transform: uppercase; letter-spacing: .08em; }
     .gestalt-q { background: var(--bg-card2); border-radius: var(--r-sm); padding: 11px 13px; margin-bottom: 7px; font-size: 14px; line-height: 1.5; border-left: 3px solid var(--accent); }
     .gestalt-q:last-child { margin-bottom: 0; }
@@ -269,7 +283,7 @@
     /* ===== MODALS ===== */
     .modal { position: fixed; inset: 0; background: rgba(0,0,0,.72); display: flex; align-items: flex-end; z-index: 200; backdrop-filter: blur(4px); }
     .modal.hidden { display: none !important; }
-    .modal-content { background: var(--bg-card); border-radius: var(--r) var(--r) 0 0; width: 100%; max-height: 92vh; overflow-y: auto; display: flex; flex-direction: column; animation: slideUp .28s cubic-bezier(.34,1.2,.64,1); border: 1px solid var(--border); border-bottom: none; }
+    .modal-content { background: rgba(18,13,0,0.88); backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px); border-radius: var(--r) var(--r) 0 0; width: 100%; max-height: 92vh; overflow-y: auto; display: flex; flex-direction: column; animation: slideUp .28s cubic-bezier(.34,1.2,.64,1); border: 1px solid rgba(245,158,11,.2); border-bottom: none; box-shadow: 0 -4px 40px rgba(0,0,0,.6); }
     .modal-compact { max-height: 70vh; }
     @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
     .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
@@ -316,8 +330,8 @@
     .btn { display: inline-flex; align-items: center; justify-content: center; padding: 13px 20px; border-radius: var(--r-sm); font-size: 16px; font-weight: 700; font-family: var(--font); cursor: pointer; border: none; transition: all .18s; line-height: 1.2; gap: 6px; }
     .btn:disabled { opacity: .5; cursor: not-allowed; }
     .btn:active:not(:disabled) { transform: scale(.97); }
-    .btn-primary { background: var(--accent); color: #fff; }
-    .btn-primary:hover:not(:disabled) { background: var(--accent-dark); }
+    .btn-primary { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; box-shadow: 0 4px 18px rgba(245,158,11,.38); }
+    .btn-primary:hover:not(:disabled) { box-shadow: 0 6px 24px rgba(245,158,11,.5); transform: translateY(-1px); }
     .btn-outline { background: transparent; border: 2px solid var(--border); color: var(--text); }
     .btn-outline:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
     .btn-danger { background: var(--danger); color: #fff; }
@@ -338,7 +352,7 @@
 
     /* ===== ONBOARDING ===== */
     .onboard-screen { background: linear-gradient(160deg, rgba(245,158,11,.14) 0%, rgba(251,113,133,.07) 100%) !important; }
-    .onboard-icon { font-size: 96px; filter: drop-shadow(0 0 28px rgba(245,158,11,.55)); animation: scalePop .5s cubic-bezier(.34,1.56,.64,1); }
+    .onboard-icon { font-size:56px; filter:none; animation:scalePop .5s cubic-bezier(.34,1.56,.64,1); box-shadow:0 12px 40px rgba(245,158,11,.22),inset 0 1px 0 rgba(255,255,255,.09); }
     .onboard-title { font-size: 30px; font-weight: 900; background: linear-gradient(135deg, #fef3c7, #fcd34d); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
     .onboard-text { font-size: 16px; color: rgba(254,248,238,.6); line-height: 1.75; }
     .onboard-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(245,158,11,.2); transition: all .3s; }
@@ -588,6 +602,7 @@
   </div>
 
   <!-- Settings FAB -->
+  <button class="fab-settings" id="fab-help" onclick="navigate('help')" style="display:none;right:66px">❓</button>
   <button class="fab-settings" id="fab-settings" onclick="openSettings()" style="display:none">⚙️</button>
   <input type="file" id="json-import-input" accept=".json" style="display:none" onchange="handleJSONImport(this)">
 
@@ -812,29 +827,42 @@
   // Фазы серфинга тяги (активный таймер)
   const URGE_PHASES = [
     {
-      dur: 60, name: 'Замечаю', emoji: '👁',
-      color: '#f59e0b',
-      desc: 'Признай тягу — не борись с ней',
-      guide: 'Скажи себе: «Я замечаю тягу. Она временна. Я могу её пережить.» Просто наблюдай за ней как за облаком.'
-    },
-    {
-      dur: 120, name: 'Дышу', emoji: '🌬',
+      dur: 60, type: 'breathe', name: 'Дышу', emoji: '🫁',
       color: '#34d399',
-      desc: 'Вдох 4с · задержка 4с · выдох 6с',
-      guide: 'Сделай 8-10 медленных дыханий. Тяга сейчас на пике — но уже начнёт спадать. Ты сильнее этой волны.'
+      desc: 'Вдох 4с · Задержи 4с · Выдох 6с',
+      guide: 'Следи за кругом — он дышит вместе с тобой. Тяга — это волна. Ты — берег. Она не смоет тебя.'
     },
     {
-      dur: 120, name: 'Наблюдаю', emoji: '🌊',
+      dur: 60, type: 'breathe', name: 'Дышу', emoji: '🌬',
       color: '#60a5fa',
-      desc: 'Волна идёт на убыль',
-      guide: 'Где в теле ты чувствуешь тягу? Грудь? Живот? Просто наблюдай — не реагируй. Тяга уже слабее, чем минуту назад.'
+      desc: 'Продолжай дышать медленно',
+      guide: 'Ты уже держишься 1 минуту. Каждый выдох уносит часть тяги. Ещё немного — и волна начнёт спадать.'
     },
     {
-      dur: 120, name: 'Отпускаю', emoji: '✨',
+      dur: 60, type: 'game', name: 'Игра', emoji: '🎮',
       color: '#a78bfa',
-      desc: 'Ты уже на спуске',
-      guide: 'Тяга почти прошла. Ты справился. Что ты чувствуешь прямо сейчас? Напиши мне об этом.'
+      desc: 'Крестики-нолики',
+      guide: 'Займи мозг. Тяга не любит, когда ты занят чем-то другим.'
+    },
+    {
+      dur: 60, type: 'anchors', name: 'Якоря', emoji: '⚓',
+      color: '#f59e0b',
+      desc: 'Твои причины',
+      guide: 'Прочти каждое слово медленно. Вспомни, ради чего ты здесь.'
+    },
+    {
+      dur: 60, type: 'ground', name: 'Заземление', emoji: '🌿',
+      color: '#34d399',
+      desc: 'Почувствуй себя здесь',
+      guide: 'Тяга прошла. Ты — здесь. Это твоя победа.'
     }
+  ];
+
+  const GROUND_PROMPTS = [
+    { text: 'Почувствуй стопы на полу', sub: 'Просто заметь их. Ты здесь, на земле.' },
+    { text: 'Заметь своё дыхание', sub: 'Оно ровное. Ты уже спокоен.' },
+    { text: 'Где была тяга?', sub: 'Прислушайся. Её уже почти нет.' },
+    { text: 'Ты справился', sub: 'Запомни это ощущение. Оно твоё.' }
   ];
 
   const DEFAULT_ALTERNATIVES = [
@@ -1011,7 +1039,8 @@
     betting: { emoji:'⚽', name:'Ставки на спорт',   desc:'Букмекеры, спортивные прогнозы',             medical:false, escape:'в ставки',        ai:'игровая зависимость (ставки на спорт)' },
     alcohol: { emoji:'🍷', name:'Алкоголь',           desc:'Зависимость от алкоголя',                   medical:true,  escape:'в выпивку',      ai:'алкогольная зависимость' },
     drugs:   { emoji:'💊', name:'Наркотики',           desc:'Зависимость от психоактивных веществ',      medical:true,  escape:'к веществам',    ai:'зависимость от психоактивных веществ' },
-    other:   { emoji:'🔄', name:'Другое',              desc:'Гаджеты, еда, соцсети, другое поведение',   medical:false, escape:'в зависимость',   ai:'поведенческая зависимость' }
+    gadgets: { emoji:'📱', name:'Гаджеты / Соцсети',    desc:'Телефон, соцсети, видео, онлайн-игры',      medical:false, escape:'в экран',         ai:'зависимость от гаджетов и социальных сетей' },
+    food:    { emoji:'🍫', name:'Еда / Кофе',            desc:'Переедание, сладкое, кофеин, импульсивная еда', medical:false, escape:'в еду',          ai:'компульсивное переедание или зависимость от кофеина' }
   };
 
   function getTypeInfo(){ return ADDICTION_TYPES[S.type] || ADDICTION_TYPES.casino; }
@@ -1085,50 +1114,64 @@
       warning:'⚠️ Отмена опиоидов, алкоголя и бензодиазепинов может быть опасной для жизни. Обратись к наркологу или в наркологический центр перед отказом.',
       groups:['Анонимные Наркоманы (НА) — na-russia.ru','Наркологическая помощь — 8-800-200-0-200 (бесплатно)','Скорая при передозировке — 112']
     },
-    other: {
-      icon:'🔄', color:'#34d399',
-      title:'Как работает поведенческая зависимость',
-      science:'Любое повторяющееся поведение, дающее быстрое облегчение или удовольствие, может стать зависимостью. Мозг оптимизирует то, что кажется «работающим» — и перестаёт искать другие источники удовлетворения.',
+    gadgets: {
+      icon:'📱', color:'#3b82f6',
+      title:'Как работает цифровая зависимость',
+      science:'Соцсети и приложения спроектированы так, чтобы удерживать внимание: бесконечная лента, лайки, уведомления — всё это переменное подкрепление, тот же механизм, что в игровых автоматах. Мозг привыкает к постоянной стимуляции и теряет способность переносить скуку.',
       facts:[
-        '🔁 Поведенческие зависимости задействуют те же нейронные пути, что и химические',
-        '📱 Экраны, еда, шопинг — всё это может стать дофаминовыми «короткими путями»',
-        '🧩 Зависимость всегда выполняет функцию: глушит боль, скуку, тревогу, одиночество',
-        '✅ Понять функцию — значит найти здоровую альтернативу этой же потребности'
+        '🔔 Каждое уведомление — маленький дофаминовый выброс, который формирует петлю',
+        '📉 Среднее время концентрации снижается уже через несколько месяцев регулярного скроллинга',
+        '🧠 Соцсети активируют те же нейронные пути, что и азартные игры',
+        '✅ 2 недели без телефона утром — и тревожность снижается, сон улучшается'
       ],
       timeline:null,
       warning:null,
-      groups:['Психолог или психотерапевт специализирующийся на зависимостях','Горячая линия психологической помощи — 8-800-2000-122 (бесплатно)']
+      groups:['Психолог специализирующийся на цифровой зависимости','Горячая линия психологической помощи — 8-800-2000-122 (бесплатно)']
+    },
+    food: {
+      icon:'🍫', color:'#d97706',
+      title:'Как работает пищевая зависимость',
+      science:'Еда — один из самых древних источников дофамина. Сахар, жир и соль активируют систему вознаграждения мозга почти мгновенно. При стрессе или скуке мозг автоматически ищет этот «быстрый» путь к облегчению — даже когда тела голода нет.',
+      facts:[
+        '🍬 Сахар вызывает тот же выброс дофамина, что и ряд психоактивных веществ',
+        '☕ Кофеиновая зависимость формируется уже при 2–3 чашках в день в течение 2 недель',
+        '🧩 Компульсивная еда всегда «о чём-то» — тревога, одиночество, усталость, скука',
+        '✅ Осознанность перед едой («я голоден телом или эмоцией?») меняет паттерн'
+      ],
+      timeline:null,
+      warning:null,
+      groups:['Психолог специализирующийся на расстройствах пищевого поведения','Горячая линия психологической помощи — 8-800-2000-122 (бесплатно)']
     }
   };
 
   const DAILY_REFLECTIONS = [
     {
-      day:'Понедельник', short:'Я начинаю неделю с памяти о том, что всё, чем я располагаю, — это неоплаченный дар.',
-      full:`Сегодня я начинаю неделю с памяти о том, что всё, чем я располагаю, — это неоплаченный дар. Я буду многократно возвращать внимание к этим дарам и не позволю себе принять их как должное. Возможные триггеры этого дня я встречу как проверку — успею их заметить, назвать про себя и записать, а не убегу в привычное.\n\nТрудности понедельника я приму как захватывающее приключение, а не как повод для бегства. Я буду действовать без спешки, с тихой радостью от того, что могу проявить свои лучшие качества.\n\nГлядя на людей, я буду помнить: каждый несёт свою невидимую битву, и за резкими проявлениями часто стоит усталость от этой битвы. Если внезапный стресс попытается захватить меня, я замечу этот момент и не уйду в игру — я переключу внимание и вспомню, что этот понедельник мог не наступить. Меня могло не быть.\n\nДень достался мне как подарок, а любая ситуация в нём — возможность проявить безупречность, на которую способен человек. Любое дело сегодня я буду делать как главное дело моей жизни.`
+      day:'Понедельник', short:'Сегодня я вижу, что у меня уже есть всё для одного спокойного дня.',
+      full:`День Принятия Даров\n\nСегодня я вижу, что у меня уже есть всё для одного спокойного дня. Я не буду принимать как должное то, что я жив, что я дышу, что у меня есть крыша и возможность начать этот день заново. Моя зависимость — это не я, это лишь привычка искать лёгкое.\n\nСегодня я буду многократно замечать: свет за окном, вкус чистой воды, возможность просто постоять на земле — это мои настоящие дары. Я выбираю смотреть на них осознанно, даже если это трудно.`
     },
     {
-      day:'Вторник', short:'Я настроен замечать дары раз за разом, не скользя по ним равнодушным взглядом.',
-      full:`Сегодня я буду смотреть на всё, что имею, как на дары, полученные без всякой моей заслуги. Я настроен замечать эти дары раз за разом, не скользя по ним равнодушным взглядом. Когда в поле появятся знакомые триггеры, я не поддамся им — я остановлюсь, замечу и зафиксирую их, чтобы позже лишить их силы.\n\nТрудности, с которыми столкнёт меня вторник, я встречу как интересный сюжет, а не как причину сбежать. В каждом действии я буду сохранять спокойный темп и внутреннюю радость от возможности действовать наилучшим образом.\n\nЛюдей вокруг я стану воспринимать как братьев и сестёр по непростой жизни: внутри каждого идёт тяжелейшая борьба, каждый нуждается в поддержке, даже если выражает это неловко или резко. Я буду принимать их такими, какие они есть сейчас.\n\nЕсли неожиданный стресс накроет меня, я сумею заметить, как он захватывает сознание, — и вместо того чтобы уйти в игру, переключу внимание на истину: этот день мне подарен, а трудная ситуация дана как пространство для проявления характера. Всякое дело сегодня для меня — единственное и главное.`
+      day:'Вторник', short:'Сегодня я разрешаю себе быть медленным.',
+      full:`День Неспешного Действия\n\nСегодня я разрешаю себе быть медленным. Любое движение, любой выбор я делаю без спешки и суеты. Если мне захочется сорваться в привычное действие (кнопку, рюмку, лишнюю еду), я сначала сделаю три вдоха.\n\nЯ действую с внутренней радостью от того, что я могу выбрать иначе. Даже просто помыть посуду или убрать со стола я буду делать как главное дело, потому что через действие я показываю себе свою силу.`
     },
     {
-      day:'Среда', short:'Я выбираю видеть дары, а не подсчитывать нехватки.',
-      full:`Сегодня я выбираю видеть дары, а не подсчитывать нехватки. Всё, что у меня есть, — не само собой разумеющееся, и я буду осознанно направлять на это внимание в течение дня. Триггеры, которые подстерегают меня в среде, я успею распознать — и вместо привычного побега в игру запишу их для дальнейшей ликвидации.\n\nПрепятствия этого дня я приглашаю стать моими учителями: я не отступлю при первой же трудности, а отнесусь к ней как к приключению, которое развивает меня. Действовать я буду без суеты, с тихим достоинством и радостью от того, что могу проявить всё, чем одарила меня природа.\n\nВ каждом встречном я постараюсь увидеть человека, которому тоже не просто жить в этом мире, — он сражается со своим врагом и нуждается в моём спокойном внимании. Если передо мной развернётся стрессовая ситуация, я успею заметить её хватку и не стану решать проблему игрой.\n\nЯ переключу внимание и вспомню: я мог не проснуться сегодня, среда досталась мне как незаслуженный подарок, а эта ситуация — как приглашение к безупречному отклику. Любое дело среди недели я делаю как главное дело жизни.`
+      day:'Среда', short:'Сегодня я посмотрю на людей спокойно.',
+      full:`День Борьбы без Врага\n\nСегодня я посмотрю на людей спокойно. Каждый рядом со мной тоже воюет со своим демоном, даже если не показывает. Если кто-то резок или груб, я вспомню: он просто забыл, что жизнь — это подарок.\n\nЯ не буду защищаться агрессией. Моя спокойная устойчивость — лучшее, что я могу дать миру сегодня. Я не спасаю других, но и не позволяю им утащить меня в хаос.`
     },
     {
-      day:'Четверг', short:'Сегодня я практикую взгляд, который замечает дары в каждом часе.',
-      full:`Сегодня я буду практиковать взгляд, который замечает дары в каждом часе. Я не стану принимать как должное ни здоровье, ни крышу над головой, ни людей рядом — я многократно вернусь к ним вниманием. Возможные триггеры четверга я встречу настороже и, заметив их, не позволю себе уйти в игру — вместо этого запишу их для освобождения.\n\nТрудности я приму как приключение, где у меня есть шанс проявить свою лучшую версию, и не сорвусь в бегство при первых помехах. Все действия сегодня я наполню внутренней радостью и отсутствием спешки.\n\nГлядя на людей, я буду помнить об их тайной борьбе и нужде в поддержке, даже если их слова или поступки кажутся необдуманными. Я смогу принять их спокойно.\n\nЕсли возникнет неожиданный стресс, я замечу, как он пытается меня захватить, — но вместо игры переключу внимание на простую истину: этого четверга могло не быть в моей жизни, и он дан мне в подарок. А трудность дана как возможность проявить безупречность, доступную человеку. Всякое дело этого дня я буду делать как самое важное из всего, что мне доверено.`
+      day:'Четверг', short:'Любую трудность сегодня я встречаю фразой: «О, это вызов».',
+      full:`День Интересного Приключения\n\nЛюбую трудность сегодня я встречаю фразой: «О, это вызов». Ту самую тягу, скуку, раздражение или желание «сбежать» я принимаю как интересное приключение. Что будет, если я не сделаю того, что диктует старая привычка? Это эксперимент.\n\nДаже если меня захватит эмоция, я успею это заметить и переключить внимание на тело: «Я чувствую огонь внутри, но я — не огонь». Сегодня я ищу не удовольствия, а новизны собственной реакции.`
     },
     {
-      day:'Пятница', short:'Я буду сознательно возвращать фокус на дары много раз в течение дня.',
-      full:`Сегодня я напоминаю себе: всё, чем я располагаю, — это дары, а не моя собственность по умолчанию. Я буду сознательно возвращать фокус на эти дары много раз в течение дня. Триггеры, которые приготовила пятница, я увижу заранее или на подлёте — и не побегу в игру, а запишу их, чтобы вырвать из своей жизни.\n\nТрудности в этот день я приму как интересное завершение рабочей недели, как приключение, а не повод сбежать при первых же помехах. Я стану действовать с внутренней радостью, без спешки, помня, что действие — это главное, чем я наполняю свою жизнь.\n\nНа людей я буду смотреть как на спутников, каждому из которых не просто: внутри них идёт сложнейшая борьба, им нужны моё спокойное присутствие и внимание. Я смогу воспринимать их необдуманные и резкие проявления с пониманием.\n\nЕсли внезапная стрессовая ситуация захватит меня, я успею это заметить — и не стану уходить от проблемы. Я переключу внимание на то, что эта пятница — подарок, которого могло не быть, а стресс — лишь сцена для проявления безупречности моего характера. Всякое дело сегодня я делаю как единственное и главное.`
+      day:'Пятница', short:'Сегодня я вспомню: я мог бы не проснуться.',
+      full:`День Безупречного Поступка\n\nСегодня я вспомню: я мог бы не проснуться. Этот день достался мне бесплатно, как подарок. Значит, любая стрессовая ситуация — это не наказание, а роль, где я могу проявить себя наилучшим образом.\n\nДаже маленький выбор (не заходить на сайт, не искать дозу, не срываться на близкого) — это безупречность характера. Я делаю каждое дело так, будто оно последнее в моей жизни. С полным присутствием. Потому что действия — это единственное, чем я реально наполняю жизнь.`
     },
     {
-      day:'Суббота', short:'Триггеры субботы, часто спрятанные под маской отдыха, я замечу и не позволю им унести меня.',
-      full:`Сегодня я смотрю на мир глазами человека, который помнит: всё, что я получаю, — дары. Я не принимаю их как должное, а возвращаюсь к ним осознанным вниманием снова и снова. Триггеры субботы, часто спрятанные под маской отдыха, я замечу и не позволю им унести меня — я запишу их, чтобы освободиться.\n\nЛюбые трудности этого дня я встречу как любопытное приключение, а не повод убежать играть. Я буду действовать без суеты, но с радостью и ощущением, что каждое моё движение может быть проявлением моих лучших даров.\n\nНа людей я стану смотреть с мыслью, что каждый из них сегодня тоже ведёт свой бой — иногда невидимый, — и нуждается в моём спокойном принятии, даже если его поведение резко или нелогично.\n\nЕсли стресс настигнет меня врасплох, я успею увидеть его приближение и не выберу игру как способ решения. Я переключу внимание и вспомню: этой субботы, этого дня отдыха и жизни могло не быть. Меня могло не быть. День подарен мне, а любая внезапная ситуация — шанс проявить безупречную реакцию. Любое дело сегодня для меня — главное событие дня.`
+      day:'Суббота', short:'Сегодня я учусь смотреть на свои желания как на облака.',
+      full:`День Спокойного Наблюдателя\n\nСегодня я учусь смотреть на свои желания как на облака. Они приходят и уходят, но я не обязан бежать за каждым. Если внутри поднимается волна тревоги или жажды «допинга» (игры, еды, экрана, вещества), я говорю себе: «Ага, это просто волна. Я постою на берегу».\n\nЯ не борюсь с ней. Я дышу. Я позволяю ей быть. И в этом спокойном «разрешении» исчезает её власть надо мной. Сегодня я принимаю мир без войны с собой.`
     },
     {
-      day:'Воскресенье', short:'В тишине воскресенья я вновь выбираю видеть дары, а не перечень нехваток.',
-      full:`Сегодня я в тишине воскресенья вновь выбираю видеть дары, а не перечень нехваток. Я не принимаю как должное ничего из того, чем наполнена моя жизнь, и многократно в течение дня возвращаю внимание к этим дарам с благодарностью. Триггеры, которые могут проявиться даже в покое, я успею распознать и, вместо того чтобы уйти в игру, запишу их для окончательной ликвидации.\n\nТрудности воскресного дня я приму как интересное приключение души и не позволю себе убежать при первой же тени препятствия. Я буду действовать медленно, с радостью и достоинством, ощущая каждое дело как пространство, где я могу проявить всё, чем одарила меня природа.\n\nНа людей я буду смотреть как на таких же путников, которым не просто: внутри каждого продолжается сложнейшая битва, и я нужен им как спокойное, неосуждающее присутствие.\n\nЕсли внезапный стресс застигнет меня, я успею заметить его захват — и не побегу в игру. Я переключу внимание и вспомню: я мог не проснуться сегодня, этот воскресный день достался мне как чистый подарок, а ситуация — как приглашение к безупречности, которая всегда доступна человеку. Любое дело я делаю сегодня как самое важное и единственное в моей жизни.`
+      day:'Воскресенье', short:'Сегодня я оглядываюсь назад ровно на один день — на сегодняшнее утро.',
+      full:`День Благодарности и Надежды\n\nСегодня я оглядываюсь назад ровно на один день — на сегодняшнее утро. Я благодарю себя за каждый момент, когда я выбрал осознанность вместо автопилота. Даже если были срывы или слабость — я здесь. Я не бросил этот путь. Я учусь.\n\nЯ вспоминаю, что быть человеком — это каждый раз начинать сначала. И это не слабость, а величайшая смелость. Завтра будет новый день, но сейчас я просто говорю «спасибо» за то, что жив, чувствую и могу выбирать.`
     }
   ];
 
@@ -1343,6 +1386,7 @@
   function render(){
     const el=document.getElementById('screen');
     const fab=document.getElementById('fab-settings');
+    const fabHelp=document.getElementById('fab-help');
 
     const map={
       'onboarding':renderOnboarding,
@@ -1367,6 +1411,7 @@
 
     const setupScreens=['onboarding','onboard-name','onboard-why','onboard-ai','onboard-mantra','type-selection','help'];
     if(fab) fab.style.display=(S.type&&!setupScreens.includes(S.screen))?'flex':'none';
+    if(fabHelp) fabHelp.style.display=(S.type&&!setupScreens.includes(S.screen))?'flex':'none';
   }
 
 
@@ -1423,9 +1468,9 @@
       { value:'more10', label:'Более 10 лет' }
     ];
     return `<div class="scroll-screen"><div class="onboard-screen" style="background:linear-gradient(160deg,rgba(245,158,11,.14) 0%,rgba(251,113,133,.07) 100%);gap:18px">
-      <div class="onboard-icon" style="animation:scalePop .5s cubic-bezier(.34,1.56,.64,1)">👋</div>
+      <div class="onboard-icon" style="animation:scalePop .5s cubic-bezier(.34,1.56,.64,1);background:linear-gradient(145deg,rgba(245,158,11,.22),rgba(245,158,11,.07))">👋</div>
       <h2 class="onboard-title">Расскажи о себе</h2>
-      <p class="onboard-text" style="margin-bottom:4px">Эта информация поможет мне говорить с тобой точнее. Видишь только ты.</p>
+      <p class="onboard-text" style="margin-bottom:4px">Это помогает мне говорить с тобой точнее. Всё хранится только на твоём устройстве — никто кроме тебя не видит.</p>
 
       <div style="width:100%;max-width:340px;display:flex;flex-direction:column;gap:12px">
         <div>
@@ -1483,7 +1528,7 @@
     const greet = firstName ? `${firstName}, зачем` : 'Зачем';
     const list = S.whyList.length>0 ? S.whyList : ['','',''];
     return `<div class="scroll-screen"><div class="onboard-screen" style="background:linear-gradient(160deg,rgba(251,113,133,.1) 0%,rgba(245,158,11,.06) 100%)">
-      <div class="onboard-icon" style="animation:scalePop .5s cubic-bezier(.34,1.56,.64,1)">❤️</div>
+      <div class="onboard-icon" style="animation:scalePop .5s cubic-bezier(.34,1.56,.64,1);background:linear-gradient(145deg,rgba(251,113,133,.25),rgba(251,113,133,.08));border-color:rgba(251,113,133,.28);box-shadow:0 12px 40px rgba(251,113,133,.2)">❤️</div>
       <h2 class="onboard-title">${greet} ты хочешь остановиться?</h2>
       <p class="onboard-text">Напиши своими словами — ради кого или чего. Это твои личные якоря на случай трудных моментов.</p>
       <div style="display:flex;flex-direction:column;gap:10px;width:100%;max-width:360px" id="why-setup-list">
@@ -1532,10 +1577,10 @@
     function stylePill(id, label, active, onclick){
       return `<button onclick="${onclick}" style="flex:1;padding:10px 6px;background:${active?'rgba(245,158,11,.2)':'#221800'};border:1.5px solid ${active?'rgba(245,158,11,.6)':'rgba(245,158,11,.15)'};border-radius:12px;color:${active?'var(--gold)':'var(--text-2)'};font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer;transition:all .2s">${label}</button>`;
     }
-    return `<div class="scroll-screen"><div class="onboard-screen" style="background:linear-gradient(160deg,rgba(124,111,255,.1) 0%,rgba(245,158,11,.08) 100%);gap:18px">
-      <div class="onboard-icon" style="animation:scalePop .5s cubic-bezier(.34,1.56,.64,1)">🤖</div>
-      <h2 class="onboard-title">Как я должен говорить?</h2>
-      <p class="onboard-text" style="margin-bottom:4px">Настрой мой стиль под себя. В любой момент можно изменить в настройках.</p>
+    return `<div class="scroll-screen"><div class="onboard-screen" style="background:linear-gradient(160deg,rgba(245,158,11,.12) 0%,rgba(52,211,153,.07) 100%);gap:18px">
+      <div class="onboard-icon" style="animation:scalePop .5s cubic-bezier(.34,1.56,.64,1);background:linear-gradient(145deg,rgba(245,158,11,.22),rgba(52,211,153,.12));border-color:rgba(245,158,11,.28);box-shadow:0 12px 40px rgba(245,158,11,.18)">💬</div>
+      <h2 class="onboard-title">Как хочешь, чтобы с тобой говорили?</h2>
+      <p class="onboard-text" style="margin-bottom:4px">Я подстроюсь под тебя. Можно изменить в любой момент.</p>
 
       <div style="width:100%;max-width:380px;display:flex;flex-direction:column;gap:16px">
 
@@ -1610,7 +1655,7 @@
     ).join('');
     return `<div class="scroll-screen"><div style="min-height:100%;display:flex;flex-direction:column;padding:28px 22px 32px;gap:20px;background:linear-gradient(160deg,rgba(245,158,11,.12) 0%,rgba(167,139,250,.08) 100%)">
       <div style="text-align:center">
-        <div style="font-size:64px;animation:scalePop .5s cubic-bezier(.34,1.56,.64,1);filter:drop-shadow(0 0 20px rgba(245,158,11,.4))">📖</div>
+        <div class="onboard-icon" style="margin:0 auto;background:linear-gradient(145deg,rgba(245,158,11,.22),rgba(251,113,133,.1));border-color:rgba(245,158,11,.28)">📖</div>
         <h2 style="font-size:26px;font-weight:900;margin-top:12px;background:linear-gradient(135deg,#fcd34d,#fb923c);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Настройка на сегодня</h2>
         <div style="font-size:15px;font-weight:700;color:rgba(245,158,11,.8);margin-top:6px">${dr.day}</div>
       </div>
@@ -1886,7 +1931,8 @@
     betting: ['Чтобы деньги шли на реальные вещи в жизни','Хочу снова наслаждаться спортом без страха','Ради честности с собой и близкими','Ради финансовой стабильности'],
     alcohol: ['Чтобы помнить все важные моменты','Ради своего здоровья — тела и головы','Хочу снова быть человеком, на которого можно положиться','Ради детей, семьи, близких'],
     drugs:   ['Ради ясности мысли — чувствовать мир настоящим','Чтобы иметь будущее, которое сам выбираю','Ради своего тела — дать ему шанс','Хочу вернуться к себе настоящему'],
-    other:   ['Ради времени — жить по-настоящему','Чтобы снова чувствовать настоящую жизнь','Ради близких людей рядом','Ради уважения и любви к себе']
+    gadgets: ['Ради живого общения с теми, кто рядом','Хочу снова уметь скучать — и находить в этом жизнь','Ради концентрации и ясности мысли','Чтобы быть по-настоящему присутствующим в своей жизни'],
+    food:    ['Ради здоровья и настоящей энергии каждый день','Чтобы еда снова приносила радость, а не вину','Хочу снова слышать своё тело','Ради ясной головы и лёгкости в теле']
   };
 
   function addWhyHint(text){
@@ -1897,7 +1943,7 @@
 
   function renderWhyTab(){
     const list = S.whyList;
-    const hints = WHY_HINTS[S.type] || WHY_HINTS.other;
+    const hints = WHY_HINTS[S.type] || WHY_HINTS.gadgets;
     const emptyBlock = list.length === 0 ? `
       <div style="background:rgba(255,107,157,.05);border:1px dashed rgba(255,107,157,.2);border-radius:18px;padding:18px 16px">
         <p style="font-size:13px;color:var(--text-2);text-align:center;margin-bottom:14px;line-height:1.6">Многие не знают с чего начать.<br>Вот что пишут чаще всего — нажми чтобы добавить:</p>
@@ -1914,7 +1960,7 @@
           <span style="font-size:22px">⚡</span><span style="font-size:12px;font-weight:700">Записать триггер</span>
         </button>
         <button onclick="startUrgeSurfing()" style="padding:12px 10px;background:rgba(52,211,153,.07);border:1.5px solid rgba(52,211,153,.2);border-radius:16px;color:var(--text);font-family:var(--font);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;transition:all .2s">
-          <span style="font-size:22px">🌊</span><span style="font-size:12px;font-weight:700">Серфинг тяги</span>
+          <span style="font-size:22px">🏄</span><span style="font-size:12px;font-weight:700">Пережить волну</span>
         </button>
         <button onclick="navigate('relapse')" style="padding:12px 10px;background:rgba(244,63,94,.07);border:1.5px solid rgba(244,63,94,.2);border-radius:16px;color:var(--text);font-family:var(--font);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;transition:all .2s">
           <span style="font-size:22px">💔</span><span style="font-size:12px;font-weight:700">Я сорвался</span>
@@ -2314,37 +2360,143 @@
   }
 
   // ── URGE SURFING TIMER ──
+  let _ttt = null;
+
+  function getBreatheStep() {
+    const ph = URGE_PHASES[S.urgePhaseIdx || 0];
+    const elapsed = ph.dur - (S.timerSec || ph.dur);
+    const cycle = elapsed % 14;
+    if (cycle < 4) return 'Вдох...';
+    if (cycle < 8) return 'Задержи...';
+    return 'Выдох...';
+  }
+
+  function buildTTTGrid() {
+    if (!_ttt) return '';
+    return _ttt.board.map((c, i) =>
+      `<button class="ttt-cell" onclick="tttMove(${i})" ${c || _ttt.status !== 'playing' ? 'disabled' : ''}>
+        ${c === 'X' ? `<span style="color:#f59e0b">✕</span>` : c === 'O' ? `<span style="color:#a78bfa">○</span>` : ''}
+      </button>`
+    ).join('');
+  }
+
+  function tttInit() { _ttt = { board: Array(9).fill(null), status: 'playing' }; }
+
+  function tttReset() {
+    tttInit();
+    const g = document.getElementById('ttt-grid'); if (g) g.innerHTML = buildTTTGrid();
+    const m = document.getElementById('ttt-msg'); if (m) { m.textContent = ''; m.style.color = 'var(--text-2)'; }
+  }
+
+  function tttMove(i) {
+    if (!_ttt || _ttt.board[i] || _ttt.status !== 'playing') return;
+    _ttt.board[i] = 'X';
+    if (tttCheck('X')) { _ttt.status = 'player-won'; }
+    else if (_ttt.board.every(c => c)) { _ttt.status = 'draw'; }
+    else {
+      const ai = tttAI(); if (ai !== -1) { _ttt.board[ai] = 'O'; if (tttCheck('O')) _ttt.status = 'ai-won'; else if (_ttt.board.every(c => c)) _ttt.status = 'draw'; }
+    }
+    const g = document.getElementById('ttt-grid'); if (g) g.innerHTML = buildTTTGrid();
+    const m = document.getElementById('ttt-msg');
+    if (m) {
+      if (_ttt.status === 'player-won') { m.textContent = '🎉 Ты выиграл! Тяга проиграла.'; m.style.color = '#34d399'; }
+      else if (_ttt.status === 'ai-won') { m.textContent = '😅 ИИ выиграл — ещё раз!'; m.style.color = 'var(--text-2)'; }
+      else if (_ttt.status === 'draw') { m.textContent = '🤝 Ничья! Давай снова.'; m.style.color = 'var(--text-2)'; }
+      if (_ttt.status !== 'playing') setTimeout(tttReset, 1800);
+    }
+  }
+
+  function tttAI() {
+    const b = _ttt.board;
+    for (let i = 0; i < 9; i++) { if (!b[i]) { b[i]='O'; if(tttCheck('O')){b[i]=null;return i;} b[i]=null; } }
+    for (let i = 0; i < 9; i++) { if (!b[i]) { b[i]='X'; if(tttCheck('X')){b[i]=null;return i;} b[i]=null; } }
+    if (!b[4]) return 4;
+    const empty = b.map((c,i) => c ? -1 : i).filter(i => i >= 0);
+    return empty.length ? empty[Math.floor(Math.random() * empty.length)] : -1;
+  }
+
+  function tttCheck(p) {
+    const b = _ttt.board;
+    return [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]].some(l => l.every(i => b[i] === p));
+  }
+
   function buildTimer() {
     const ph = URGE_PHASES[S.urgePhaseIdx || 0];
     const total = URGE_PHASES.reduce((s,p) => s+p.dur, 0);
     const elapsed = URGE_PHASES.slice(0, S.urgePhaseIdx||0).reduce((s,p) => s+p.dur, 0);
     const totalPct = Math.round(elapsed / total * 100);
-
     const phaseDots = URGE_PHASES.map((p,i) => {
       const st = i < (S.urgePhaseIdx||0) ? 'done' : i === (S.urgePhaseIdx||0) ? 'active' : '';
       return `<div class="urge-dot ${st}" style="${st==='active'?`background:${p.color};box-shadow:0 0 10px ${p.color}66`:''}"></div>`;
     }).join('');
 
+    let phaseContent;
+    if (ph.type === 'breathe') {
+      phaseContent = `
+        <div class="urge-circle breathe-anim" id="urge-circle" style="border-color:${ph.color};box-shadow:0 0 40px ${ph.color}33;color:${ph.color}">
+          <div class="urge-emoji">${ph.emoji}</div>
+          <div class="urge-phase-name" style="color:${ph.color}">${ph.name}</div>
+          <div class="urge-sec" id="urge-sec">${S.timerSec || ph.dur}</div>
+          <div class="urge-sec-label">сек</div>
+        </div>
+        <div class="urge-breathe-label" id="urge-breathe" style="color:${ph.color}">${getBreatheStep()}</div>
+        <div class="urge-desc" style="color:${ph.color}">${ph.desc}</div>
+        <div class="urge-guide">${ph.guide}</div>`;
+    } else if (ph.type === 'game') {
+      if (!_ttt) tttInit();
+      phaseContent = `
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="font-size:28px">${ph.emoji}</div>
+          <div><div style="font-weight:800;font-size:16px;color:${ph.color}">${ph.desc}</div>
+          <div style="font-size:13px;color:var(--text-3)">Осталось: <span id="urge-sec" style="font-weight:700;color:${ph.color}">${S.timerSec || ph.dur}</span>с</div></div>
+        </div>
+        <div id="ttt-grid" class="ttt-grid">${buildTTTGrid()}</div>
+        <div id="ttt-msg" style="font-size:14px;font-weight:700;height:22px;text-align:center;color:var(--text-2)"></div>
+        <button class="btn btn-outline btn-sm" onclick="tttReset()" style="font-size:13px">🔄 Новая игра</button>
+        <div class="urge-guide">${ph.guide}</div>`;
+    } else if (ph.type === 'anchors') {
+      const items = (S.whyList||[]).filter(w=>w&&w.trim()).slice(0,6);
+      const defaults = ['Семья','Здоровье','Свобода','Будущее','Уважение к себе'];
+      const list = items.length > 0 ? items : defaults;
+      const idx = Math.min(Math.floor((ph.dur - (S.timerSec||ph.dur)) / 12), list.length - 1);
+      const cur = list[Math.max(idx, 0)];
+      phaseContent = `
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="font-size:28px">${ph.emoji}</div>
+          <div><div style="font-weight:800;font-size:16px;color:${ph.color}">${ph.desc}</div>
+          <div style="font-size:13px;color:var(--text-3)">Осталось: <span id="urge-sec" style="font-weight:700;color:${ph.color}">${S.timerSec || ph.dur}</span>с</div></div>
+        </div>
+        <div style="display:flex;gap:6px;justify-content:center">${list.map((_,i)=>`<div style="width:8px;height:8px;border-radius:50%;background:${i===Math.max(idx,0)?ph.color:'rgba(255,255,255,.15)'}"></div>`).join('')}</div>
+        <div class="urge-anchor-card" id="urge-anchor-card">
+          <div class="urge-anchor-num">Причина ${Math.max(idx,0)+1} из ${list.length}</div>
+          <div class="urge-anchor-text">${esc(cur)}</div>
+        </div>
+        <div class="urge-guide">${ph.guide}</div>`;
+    } else if (ph.type === 'ground') {
+      const gIdx = Math.min(Math.floor((ph.dur - (S.timerSec||ph.dur)) / 15), GROUND_PROMPTS.length - 1);
+      const gp = GROUND_PROMPTS[Math.max(gIdx, 0)];
+      phaseContent = `
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="font-size:28px">${ph.emoji}</div>
+          <div><div style="font-weight:800;font-size:16px;color:${ph.color}">${ph.desc}</div>
+          <div style="font-size:13px;color:var(--text-3)">Осталось: <span id="urge-sec" style="font-weight:700;color:${ph.color}">${S.timerSec || ph.dur}</span>с</div></div>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:center">${GROUND_PROMPTS.map((_,i)=>`<div style="width:8px;height:8px;border-radius:50%;transition:all .4s;background:${i===Math.max(gIdx,0)?ph.color:'rgba(255,255,255,.15)'}"></div>`).join('')}</div>
+        <div id="urge-ground-card" style="padding:28px 28px;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.22);border-radius:22px;max-width:300px;width:100%;text-align:center;animation:fadeInUp .4s ease">
+          <div style="font-size:26px;font-weight:900;color:${ph.color};line-height:1.3;margin-bottom:10px" id="urge-ground-text">${gp.text}</div>
+          <div style="font-size:15px;color:var(--text-2);line-height:1.6" id="urge-ground-sub">${gp.sub}</div>
+        </div>`;
+    }
+
     return `<div class="urge-screen" id="urge-screen">
       <div class="urge-phase-dots">${phaseDots}</div>
-
-      <div class="urge-circle" id="urge-circle" style="border-color:${ph.color};box-shadow:0 0 40px ${ph.color}33">
-        <div class="urge-emoji">${ph.emoji}</div>
-        <div class="urge-phase-name" style="color:${ph.color}">${ph.name}</div>
-        <div class="urge-sec" id="urge-sec">${S.timerSec || ph.dur}</div>
-        <div class="urge-sec-label">сек</div>
-      </div>
-
-      <div class="urge-desc" style="color:${ph.color}">${ph.desc}</div>
-      <div class="urge-guide">${ph.guide}</div>
-
+      ${phaseContent}
       <div class="urge-progress-wrap">
         <div class="urge-progress-bar">
           <div class="urge-progress-fill" id="urge-fill" style="width:${totalPct}%;background:${ph.color}"></div>
         </div>
-        <div class="urge-progress-label">Фаза ${(S.urgePhaseIdx||0)+1} из ${URGE_PHASES.length}</div>
+        <div class="urge-progress-label">Шаг ${(S.urgePhaseIdx||0)+1} из ${URGE_PHASES.length}</div>
       </div>
-
       <div class="urge-actions" id="urge-actions">
         <button class="btn btn-outline btn-sm" onclick="returnToHome()">← Вернуться</button>
         <button class="btn btn-sm" style="background:${ph.color};color:#0d0a00;font-weight:800" onclick="openCrisisChat()">💬 Поговорить с ИИ</button>
@@ -2392,6 +2544,31 @@
     const pct = Math.round(elapsed / total * 100);
     const fill = document.getElementById('urge-fill');
     if(fill) fill.style.width = pct + '%';
+    // Breathing label
+    if(ph.type === 'breathe') {
+      const lbl = document.getElementById('urge-breathe');
+      if(lbl) lbl.textContent = getBreatheStep();
+    }
+    // Anchors cycling
+    if(ph.type === 'anchors') {
+      const items = (S.whyList||[]).filter(w=>w&&w.trim()).slice(0,6);
+      const defaults = ['Семья','Здоровье','Свобода','Будущее','Уважение к себе'];
+      const list = items.length > 0 ? items : defaults;
+      const idx = Math.min(Math.floor((ph.dur - S.timerSec) / 12), list.length - 1);
+      const card = document.getElementById('urge-anchor-card');
+      if(card) card.innerHTML = `<div class="urge-anchor-num">Причина ${idx+1} из ${list.length}</div><div class="urge-anchor-text">${esc(list[idx])}</div>`;
+      const dots = document.querySelectorAll('#urge-screen .urge-anchor-dot');
+      dots.forEach((d,i) => d.style.background = i===idx?ph.color:'rgba(255,255,255,.15)');
+    }
+    // Ground prompts cycling
+    if(ph.type === 'ground') {
+      const gIdx = Math.min(Math.floor((ph.dur - S.timerSec) / 15), GROUND_PROMPTS.length - 1);
+      const gp = GROUND_PROMPTS[Math.max(gIdx, 0)];
+      const gt = document.getElementById('urge-ground-text');
+      const gs = document.getElementById('urge-ground-sub');
+      if(gt) gt.textContent = gp.text;
+      if(gs) gs.textContent = gp.sub;
+    }
     return true;
   }
   function urgeSurfingDone() {
@@ -2403,12 +2580,12 @@
     if(screen) {
       screen.innerHTML = `
         <div style="display:flex;flex-direction:column;align-items:center;gap:20px;padding:32px 20px;text-align:center;animation:fadeInUp .4s ease">
-          <div style="font-size:80px;filter:drop-shadow(0 0 24px rgba(52,211,153,.5))">🏄</div>
-          <h2 style="font-size:28px;font-weight:900;background:linear-gradient(135deg,#34d399,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Ты пережил волну!</h2>
+          <div class="onboard-icon" style="margin:0 auto;background:linear-gradient(145deg,rgba(52,211,153,.25),rgba(96,165,250,.15));border-color:rgba(52,211,153,.3);box-shadow:0 12px 40px rgba(52,211,153,.25);animation:scalePop .5s cubic-bezier(.34,1.56,.64,1)">🏄</div>
+          <h2 style="font-size:28px;font-weight:900;background:linear-gradient(135deg,#34d399,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">5 минут. Ты справился.</h2>
           <p style="font-size:16px;color:var(--text-2);max-width:300px;line-height:1.6">Тяга прошла пик и спала. Ты доказал себе, что сильнее её.</p>
-          <div style="background:#1a1200;border:1px solid rgba(52,211,153,.2);border-radius:16px;padding:16px 24px;font-size:15px">
-            <div>🏄 Серфингов: <strong style="color:#34d399">${S.stats.postpone}</strong></div>
-            <div style="margin-top:6px">🔥 Дней без игры: <strong style="color:var(--gold)">${getStreakDays()}</strong></div>
+          <div style="background:rgba(26,18,0,.7);border:1px solid rgba(52,211,153,.2);border-radius:16px;padding:16px 24px;font-size:15px">
+            <div>🏄 Пройдено волн: <strong style="color:#34d399">${S.stats.postpone}</strong></div>
+            <div style="margin-top:6px">🔥 Дней без срыва: <strong style="color:var(--gold)">${getStreakDays()}</strong></div>
           </div>
           <button class="btn btn-success btn-lg" onclick="urgeSurfingChat()">💬 Поговорить с ИИ об этом</button>
           <button class="btn btn-ghost" onclick="returnToHome()">На главную</button>
@@ -2944,7 +3121,7 @@
     const t=getTypeInfo();
     document.getElementById('s-type').textContent=S.type?`${t.emoji} ${t.name}`:'Не выбран';
     const sd=document.getElementById('s-stats');
-    if(sd)sd.innerHTML=`<div class="stats-display-row">🔥 Дней без игры: <strong>${getStreakDays()}</strong></div><div class="stats-display-row">⏸️ Отложил: <strong>${S.stats.postpone}</strong></div><div class="stats-display-row">🎮 Сыграл: <strong>${S.stats.play}</strong></div>`;
+    if(sd)sd.innerHTML=`<div class="stats-display-row">🔥 Дней без зависимости: <strong>${getStreakDays()}</strong></div><div class="stats-display-row">⏸️ Отложил: <strong>${S.stats.postpone}</strong></div><div class="stats-display-row">🎮 Сыграл: <strong>${S.stats.play}</strong></div>`;
     const al=document.getElementById('alt-list');
     if(al){const list=S.alternatives.length>0?S.alternatives:[...DEFAULT_ALTERNATIVES];al.innerHTML=list.map((a,i)=>`<div class="alt-item"><input type="text" class="input alt-input" value="${esc(a)}" onchange="updateAlt(${i},this.value)" placeholder="Занятие..."><button class="btn-icon" onclick="removeAlt(${i})">✕</button></div>`).join('');}
     const sn=document.getElementById('s-name'); if(sn) sn.value=S.name||'';
@@ -2999,7 +3176,7 @@
 
   // ── EXPORT ──
   function exportData(){
-    const text=`SANA — Отчёт о выздоровлении\nДата: ${new Date().toLocaleDateString('ru',{day:'numeric',month:'long',year:'numeric'})}\nТип: ${getTypeInfo().name}\nДней без игры: ${getStreakDays()}\nПотерял всего: ${getTotalLost().toLocaleString('ru')}\n\nИСТОРИЯ:\n${S.history.map(h=>`[${new Date(h.date).toLocaleDateString('ru')}] ${h.result==='postponed'?'Устоял':'Сыграл'} | ${Number(h.lost||0).toLocaleString('ru')} ₩ | ${h.q1||'—'}`).join('\n')}`;
+    const text=`SANA — Отчёт о выздоровлении\nДата: ${new Date().toLocaleDateString('ru',{day:'numeric',month:'long',year:'numeric'})}\nТип: ${getTypeInfo().name}\nДней без зависимости: ${getStreakDays()}\nПотерял всего: ${getTotalLost().toLocaleString('ru')}\n\nИСТОРИЯ:\n${S.history.map(h=>`[${new Date(h.date).toLocaleDateString('ru')}] ${h.result==='postponed'?'Устоял':'Сыграл'} | ${Number(h.lost||0).toLocaleString('ru')} ₩ | ${h.q1||'—'}`).join('\n')}`;
     const a=document.createElement('a');a.href='data:text/plain;charset=utf-8,'+encodeURIComponent(text);a.download=`sana-report-${new Date().toISOString().substring(0,10)}.txt`;a.click();
   }
 
