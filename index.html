@@ -2304,6 +2304,7 @@
         <div class="stat-card"><div class="stat-num">${S.checkinHistory.length}</div><div class="stat-lbl">Чекинов</div></div>
       </div>
 
+      ${renderHeatmap()}
       ${patterns?`<div class="pattern-card"><div class="pattern-card-title">📊 Твои паттерны</div><div class="pattern-card-sub">Чаще всего возникает тяга, когда:</div>${patterns.map(([r,c])=>`<div class="pattern-item"><div class="pattern-bar-bg"><div class="pattern-bar-fill" style="width:${Math.round(c/patterns[0][1]*100)}%"></div><div class="pattern-bar-text">"${r}"</div></div><span class="pattern-count">${c}×</span></div>`).join('')}</div>`:''}
       ${recent.length>0?`<div class="checkin-history-card"><div class="chi-title">Последние чекины</div>${recent.map(c=>`<div class="chi-row"><span>${new Date(c.date).toLocaleDateString('ru',{day:'numeric',month:'short'})}</span><span>${c.mood?moods[c.mood]:''} ${c.risk===true?'⚠️ риск':c.risk==='maybe'?'🤔 не знаю':c.risk===false?'✓ всё ок':''}</span></div>`).join('')}</div>`:''}
       ${renderVictoriesSection()}
@@ -2316,6 +2317,62 @@
         <button class="btn btn-outline btn-sm" onclick="exportData()">⬇️ Экспорт отчёта</button>
       </div>
 
+    </div>`;
+  }
+
+  function renderHeatmap(){
+    const WEEKS=15;
+    const today=new Date();today.setHours(0,0,0,0);
+    const todayStr=today.toISOString().substring(0,10);
+    const dow=(today.getDay()+6)%7;
+    const start=new Date(today);start.setDate(today.getDate()-dow-(WEEKS-1)*7);
+    const checkinMap={};S.checkinHistory.forEach(c=>{const k=c.date.substring(0,10);if(!checkinMap[k])checkinMap[k]=c;});
+    const sessionMap={};S.history.forEach(h=>{const k=h.date.substring(0,10);if(!sessionMap[k]||h.result==='played')sessionMap[k]=h.result;});
+    const moodBg=['','rgba(239,68,68,.5)','rgba(239,68,68,.8)','rgba(217,119,6,.75)','rgba(212,160,23,.9)','#f59e0b'];
+    const moodTxt=[null,'очень плохо','плохо','нейтрально','хорошо','отлично'];
+    let monthHtml='',prevMonth=-1;
+    for(let w=0;w<WEEKS;w++){
+      const wd=new Date(start);wd.setDate(start.getDate()+w*7);
+      const mo=wd.getMonth();
+      monthHtml+=`<div style="font-size:9px;color:rgba(255,255,255,.3);overflow:hidden;white-space:nowrap">${mo!==prevMonth?wd.toLocaleDateString('ru',{month:'short'}):''}</div>`;
+      prevMonth=mo;
+    }
+    let cells='';
+    for(let d=0;d<7;d++){
+      for(let w=0;w<WEEKS;w++){
+        const day=new Date(start);day.setDate(start.getDate()+w*7+d);
+        const key=day.toISOString().substring(0,10);
+        const isFuture=day>today;const isToday=key===todayStr;
+        const ci=checkinMap[key];const se=sessionMap[key];
+        let bg,tip;
+        if(isFuture){bg='rgba(255,255,255,.03)';tip='';}
+        else if(se==='played'){bg='#ef4444';tip=`${key}: срыв`;}
+        else if(ci){const m=ci.mood||3;bg=moodBg[m];tip=`${key}: ${moodTxt[m]||''}`;}
+        else if(se==='postponed'){bg='rgba(245,158,11,.2)';tip=`${key}: сессия`;}
+        else{bg='rgba(255,255,255,.07)';tip=key;}
+        const brd=isToday?'outline:1.5px solid #f59e0b;outline-offset:-1px;':'';
+        cells+=`<div title="${tip}" style="background:${bg};border-radius:2px;${brd}aspect-ratio:1"></div>`;
+      }
+    }
+    const dlbls=['Пн','','Ср','','Пт','',''];
+    return`<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;box-shadow:var(--card-shadow)">
+      <div style="font-size:13px;font-weight:700;color:var(--text-1);margin-bottom:8px">📅 Активность</div>
+      <div style="display:flex;gap:3px">
+        <div style="flex-shrink:0;width:16px;display:flex;flex-direction:column;justify-content:space-around;padding-top:16px">
+          ${dlbls.map(l=>`<div style="font-size:9px;color:rgba(255,255,255,.25);text-align:right;line-height:1">${l}</div>`).join('')}
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="display:grid;grid-template-columns:repeat(${WEEKS},1fr);gap:2px;margin-bottom:2px">${monthHtml}</div>
+          <div style="display:grid;grid-template-columns:repeat(${WEEKS},1fr);gap:2px">${cells}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:5px;margin-top:8px;align-items:center;flex-wrap:wrap">
+        <span style="font-size:10px;color:rgba(255,255,255,.3)">Чекин:</span>
+        ${[1,2,3,4,5].map(m=>`<div title="${moodTxt[m]}" style="width:10px;height:10px;background:${moodBg[m]};border-radius:2px"></div>`).join('')}
+        <span style="font-size:10px;color:rgba(255,255,255,.25)">·</span>
+        <div style="width:10px;height:10px;background:#ef4444;border-radius:2px"></div>
+        <span style="font-size:10px;color:rgba(255,255,255,.3)">срыв</span>
+      </div>
     </div>`;
   }
 
