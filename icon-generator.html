@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>SANA Icon Generator</title>
+  <style>
+    body { background: #111; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; gap: 24px; padding: 40px 20px; }
+    h1 { color: #f59e0b; }
+    .preview { display: flex; gap: 32px; align-items: flex-end; flex-wrap: wrap; justify-content: center; }
+    .preview-item { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    canvas { border-radius: 22%; box-shadow: 0 0 30px rgba(245,158,11,0.4); }
+    button { background: #f59e0b; color: #000; border: none; padding: 10px 24px; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; }
+    button:hover { background: #d97706; }
+    p { color: rgba(255,255,255,0.5); font-size: 13px; text-align: center; max-width: 500px; }
+  </style>
+</head>
+<body>
+  <h1>SANA — Генератор иконок</h1>
+  <p>Скачай иконки и положи их в папку <code>sana-deploy/</code> с именами <code>icon-192.png</code> и <code>icon-512.png</code></p>
+
+  <div class="preview">
+    <div class="preview-item">
+      <canvas id="c512" width="512" height="512"></canvas>
+      <button onclick="dl(512)">⬇ Скачать 512×512</button>
+      <span style="font-size:12px;color:#666">icon-512.png</span>
+    </div>
+    <div class="preview-item">
+      <canvas id="c192" width="192" height="192" style="width:96px;height:96px"></canvas>
+      <button onclick="dl(192)">⬇ Скачать 192×192</button>
+      <span style="font-size:12px;color:#666">icon-192.png</span>
+    </div>
+  </div>
+
+  <script>
+    function drawIcon(canvas) {
+      const s = canvas.width;
+      const ctx = canvas.getContext('2d');
+
+      // Clip to rounded square (Android icon shape)
+      const r = Math.round(s * 0.2);
+      ctx.beginPath();
+      ctx.roundRect(0, 0, s, s, r);
+      ctx.clip();
+
+      // Dark amber background
+      const bgGrad = ctx.createRadialGradient(s * 0.5, s * 0.35, 0, s * 0.5, s * 0.5, s * 0.75);
+      bgGrad.addColorStop(0, '#1f1500');
+      bgGrad.addColorStop(1, '#0d0900');
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, s, s);
+
+      // Amber glow behind letter
+      const glowGrad = ctx.createRadialGradient(s * 0.5, s * 0.5, 0, s * 0.5, s * 0.5, s * 0.44);
+      glowGrad.addColorStop(0, 'rgba(245,158,11,0.22)');
+      glowGrad.addColorStop(1, 'rgba(245,158,11,0)');
+      ctx.fillStyle = glowGrad;
+      ctx.fillRect(0, 0, s, s);
+
+      // Letter S
+      const fontSize = Math.round(s * 0.64);
+      ctx.font = `900 ${fontSize}px 'Arial Black', Arial, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      // Amber gradient
+      const tg = ctx.createLinearGradient(0, s * 0.22, 0, s * 0.8);
+      tg.addColorStop(0, '#ffe066');
+      tg.addColorStop(0.4, '#f59e0b');
+      tg.addColorStop(1, '#b45309');
+
+      ctx.shadowColor = 'rgba(251,191,36,0.75)';
+      ctx.shadowBlur = s * 0.07;
+      ctx.fillStyle = tg;
+      ctx.fillText('S', s * 0.5, s * 0.52);
+    }
+
+    [512, 192].forEach(sz => drawIcon(document.getElementById('c' + sz)));
+
+    function dl(size) {
+      const a = document.createElement('a');
+      a.href = document.getElementById('c' + size).toDataURL('image/png');
+      a.download = `icon-${size}.png`;
+      a.click();
+    }
+  </script>
+</body>
+</html>
