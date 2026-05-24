@@ -3559,40 +3559,115 @@ ${nameCtx}${profileCtx}${intentionCtx}${checkinCtx}${whyCtx}${distCtx}Серия
 
   // ── HELP SCREEN ──
   function renderHelp(){
-    const items = [
-      { icon:'💬', title:'Чат с ИИ', desc:'Главный инструмент. Пиши всё что беспокоит — ИИ здесь 24/7, без осуждения.' },
-      { icon:'✊', title:'Победный момент', desc:'Кнопка ✊ в поле ввода чата. Фиксирует победы над тягой — твой личный журнал силы.' },
-      { icon:'⚡', title:'Журнал триггеров', desc:'Кнопка ⚡ — записывай что провоцирует тягу. Со временем видишь паттерны и перехватываешь их заранее.' },
-      { icon:'🌊', title:'Серфинг тяги', desc:'Кнопка 🌊 — таймер с дыхательными фазами когда тяга накатывает. Фазы: заметить → принять → дышать → отпустить.' },
-      { icon:'❤️', title:'Мои причины', desc:'Вкладка «Причины». Якоря — ради чего ты остановился. Читай в самые трудные моменты.' },
-      { icon:'🧭', title:'Философские линзы', desc:'Центральная кнопка навигации. 5 традиций: буддизм, стоицизм, христианство, экзистенциализм, индуизм. Выбери — ИИ говорит на её языке.' },
-      { icon:'📊', title:'Прогресс', desc:'Статистика серии, 14 достижений, история чекинов. Серия дней без зависимости — главная цифра.' },
-      { icon:'☀️', title:'Чекин', desc:'Утром и вечером — кнопка «☀️ Чекин» в шапке. Настроение, риск, заметка. ИИ отвечает персонально.' },
-      { icon:'📖', title:'Настройка дня', desc:'Карточка в шапке — ежедневная рефлексия по дням недели. Меняется каждый день.' },
-      { icon:'⚙️', title:'Настройки', desc:'Кнопка ⚙️ вверху справа. Имя, стиль ИИ, бэкап данных, смена типа зависимости.' },
-      { icon:'🚨', title:'Экстренная помощь', desc:'При мыслях о самоповреждении — напиши об этом в чат. Появится горячая линия: 8-800-2000-122, бесплатно 24/7.' },
+    const meds = [
+      {
+        icon:'☀️', title:'Утренний и вечерний чекин',
+        dose:'2 раза в день — утром и вечером',
+        effect:'Держит тебя осознанным. Как измерение пульса — ты знаешь своё состояние и ловишь риск до того, как он стал кризисом. Без регулярного чекина зависимость растёт в слепой зоне.'
+      },
+      {
+        icon:'💬', title:'Чат с ИИ',
+        dose:'Каждый раз, когда тяжело, одиноко или страшно',
+        effect:'Самый сильный инструмент. Не держи боль внутри — выговорись. Проговорённая тяга теряет силу. Молчание усиливает зависимость, разговор — ослабляет.'
+      },
+      {
+        icon:'🌊', title:'Серфинг тяги',
+        dose:'При каждом приступе — запускай немедленно',
+        effect:'Экстренное обезболивающее. Тяга — это волна, она ВСЕГДА проходит. 4 минуты дыхания проводят тебя через пик, пока срыва не случилось. Это буквально спасение в критический момент.'
+      },
+      {
+        icon:'❤️', title:'Мои причины',
+        dose:'Каждое утро и при каждой тяге',
+        effect:'Якорная терапия. Когда мозг хочет сорваться — он забывает, зачем ты остановился. Твои причины возвращают память о том, что важнее. Перечитывай, даже если кажется что знаешь наизусть.'
+      },
+      {
+        icon:'⚡', title:'Журнал триггеров',
+        dose:'Сразу после каждого приступа тяги',
+        effect:'Диагностика болезни. Зависимость живёт в триггерах — скука, стресс, одиночество, конкретные места. Когда видишь паттерн — можешь его обойти заранее. Без диагноза нет лечения.'
+      },
+      {
+        icon:'✊', title:'Победные моменты',
+        dose:'После каждой выигранной битвы с тягой',
+        effect:'Нейрологическое закрепление. Записанная победа закрепляется в памяти сильнее, чем просто пережитая. Мозг учится побеждать через накопление доказательств своей силы.'
+      },
+      {
+        icon:'🧭', title:'Философская традиция',
+        dose:'Выбери одну — и придерживайся её',
+        effect:'Мировоззренческий фундамент. Выздоровление требует смысла. Традиция даёт язык для понимания своей боли и пути. Без «зачем» любой инструмент теряет половину силы.'
+      },
+      {
+        icon:'🔔', title:'Напоминания',
+        dose:'Включи один раз — и забудь',
+        effect:'Соблюдение режима лечения. Даже лучшее лекарство не работает, если его не принимать. Напоминание устраняет главного врага выздоровления — забывчивость в моменты, когда «всё хорошо».'
+      },
+      {
+        icon:'📊', title:'Прогресс и достижения',
+        dose:'Смотри каждый раз, когда сомневаешься',
+        effect:'Визуализация пути. Серия дней — это не просто число. Это живое доказательство, что ты уже меняешься. В момент сомнения один взгляд на прогресс возвращает мотивацию лучше любых слов.'
+      },
+    ];
+    const protocol = [
+      ['🌅','Утро (2 мин)','Чекин + прочитай свои причины вслух'],
+      ['⚡','В течение дня','Записывай триггеры и победы по мере возникновения'],
+      ['💬','Когда тяжело','Открой чат — не держи в себе, выговорись немедленно'],
+      ['🌊','При тяге','Запусти серфинг — 4 минуты, и волна спадёт'],
+      ['🌙','Вечер (2 мин)','Вечерний чекин — подведи итог дня честно'],
     ];
     return `<div class="scroll-screen"><div style="padding:20px 20px 100px;max-width:480px;margin:0 auto">
+
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
         <button onclick="navigate('home')" style="width:38px;height:38px;border-radius:50%;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);font-size:20px;cursor:pointer;color:var(--text)">←</button>
-        <h2 style="font-size:20px;font-weight:900;margin:0">Как пользоваться SANA</h2>
+        <h2 style="font-size:20px;font-weight:900;margin:0">Как использовать SANA</h2>
       </div>
-      <div style="display:flex;flex-direction:column;gap:10px">
-        ${items.map(it=>`<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:18px;padding:16px 18px;display:flex;gap:14px;align-items:flex-start">
-          <div style="font-size:28px;flex-shrink:0;margin-top:2px">${it.icon}</div>
-          <div><div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:4px">${it.title}</div>
-          <div style="font-size:13px;color:var(--text-2);line-height:1.6">${it.desc}</div></div>
+
+      <div style="background:linear-gradient(135deg,rgba(245,158,11,.14),rgba(251,191,36,.05));border:1.5px solid rgba(245,158,11,.35);border-radius:22px;padding:22px 20px;margin-bottom:28px;text-align:center">
+        <div style="font-size:36px;margin-bottom:12px">💊</div>
+        <div style="font-size:17px;font-weight:900;color:var(--text);margin-bottom:12px;line-height:1.4">SANA — это курс лечения,<br>а не просто приложение</div>
+        <div style="font-size:13px;color:var(--text-2);line-height:1.8">Каждая функция — отдельное лекарство со своими показаниями и дозировкой. Одно снимает острую боль, другое строит иммунитет, третье ставит диагноз. Чем регулярнее ты принимаешь их все — тем выше вероятность выздоровления. <strong style="color:var(--amber)">Это не метафора.</strong></div>
+      </div>
+
+      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:rgba(245,158,11,.6);margin-bottom:12px;padding-left:2px">Схема лечения</div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:28px">
+        ${meds.map(m=>`<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:18px;padding:16px 18px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <span style="font-size:26px;flex-shrink:0">${m.icon}</span>
+            <div>
+              <div style="font-size:14px;font-weight:800;color:var(--text)">${m.title}</div>
+              <div style="font-size:11px;color:rgba(245,158,11,.85);font-weight:700;margin-top:2px">📋 ${m.dose}</div>
+            </div>
+          </div>
+          <div style="font-size:13px;color:var(--text-2);line-height:1.65;padding-left:36px">${m.effect}</div>
         </div>`).join('')}
       </div>
-      <div style="margin-top:16px;padding:14px 16px;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.15);border-radius:14px;text-align:center">
+
+      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:rgba(245,158,11,.6);margin-bottom:12px;padding-left:2px">Идеальный день в SANA</div>
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:18px;padding:6px 18px;margin-bottom:28px">
+        ${protocol.map(([e,t,d],i)=>`<div style="display:flex;gap:12px;padding:14px 0;${i<protocol.length-1?'border-bottom:1px solid rgba(255,255,255,.05)':''}">
+          <span style="font-size:22px;flex-shrink:0;margin-top:1px">${e}</span>
+          <div>
+            <div style="font-size:13px;font-weight:800;color:var(--text)">${t}</div>
+            <div style="font-size:12px;color:var(--text-2);margin-top:3px;line-height:1.5">${d}</div>
+          </div>
+        </div>`).join('')}
+      </div>
+
+      <div style="background:linear-gradient(135deg,rgba(34,197,94,.1),rgba(245,158,11,.07));border:1.5px solid rgba(34,197,94,.3);border-radius:18px;padding:20px;margin-bottom:20px;text-align:center">
+        <div style="font-size:28px;margin-bottom:10px">🧬</div>
+        <div style="font-size:15px;font-weight:900;color:var(--text);margin-bottom:10px">Формула выздоровления</div>
+        <div style="font-size:13px;color:var(--text-2);line-height:1.8"><strong style="color:rgba(34,197,94,.9)">Регулярность важнее интенсивности.</strong> Лучше по 3 минуты каждый день, чем час раз в неделю. Мозг меняется через повторение — именно так рвётся зависимость. Каждый день без срыва — это физически новые нейронные связи.</div>
+      </div>
+
+      <div style="padding:14px 16px;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.15);border-radius:14px;text-align:center;margin-bottom:16px">
         <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(245,158,11,.7);margin-bottom:4px">Экстренная помощь</div>
         <div style="font-size:14px;font-weight:800;color:var(--text)">📞 8-800-2000-122</div>
         <div style="font-size:12px;color:var(--text-2);margin-top:2px">Бесплатно, 24/7</div>
       </div>
-      <button class="btn btn-primary btn-lg" style="width:100%;margin-top:16px" onclick="navigate('home')">← Назад в приложение</button>
-      <div style="text-align:center;margin-top:12px">
+
+      <button class="btn btn-primary btn-lg" style="width:100%;margin-bottom:12px" onclick="navigate('home')">← Назад в приложение</button>
+      <div style="text-align:center">
         <button class="btn btn-ghost btn-sm" onclick="showTour()">🗺️ Показать тур заново</button>
       </div>
+
     </div></div>`;
   }
 
